@@ -255,7 +255,7 @@ ggsave("~/Desktop/HT_CI_Set1_delta_plot.pdf", CI_Plots, width = 8, height = 6)
 ##FRAP - set 1
 ##only need the averages for the plots 
 #Load data file with only avg and SE for each site. If I need all the points I can use HT_FRAP_bothSets_042320.csv
-FRAP <- read.csv("~/Desktop/Coding/R/HT/csv_files/FRAP/HT_FRAP_Siteavgs_043020.csv")
+FRAP <- read.csv("~/Desktop/PutnamLab/Repositories/Oysters_EnvHistory/data/FRAP/HT_FRAP_Siteavgs_043020.csv")
 View(FRAP)
 #gives me this warning when I load data file:
 # Warning message:
@@ -267,7 +267,7 @@ View(FRAP)
 f_p1 = ggplot(FRAP, aes(x=Site, y=FRAPavg1)) + #establishing what's going on the plot
   geom_bar(stat = "identity", color = "black", size = 0.3, width = 0.5) + # bar plot in these sizes, shapes, colors, etc
   geom_errorbar(aes(ymin = FRAPavg1 - FRAPse1, ymax = FRAPavg1 + FRAPse1), width = 0.2, position = position_dodge(0.75), size = 0.5) +
-  ylab("FRAP") + xlab("") + # titles for x and y axes
+  ylab("Total antioxidant potential (μmol/g of tissue)") + xlab("") + # titles for x and y axes
   #ggtitle("FRAP set1" - Set1") + # figure title 
   scale_y_continuous(expand = c(0,0), limits = c(0, 1.35)) + #making the bars sit right on the x axis-- no white space bt the bars and the actual axis
   theme_minimal() + #setting the background theme
@@ -280,7 +280,7 @@ ggplot(data = FRAP, aes(x=Site, y=FRAPavg2)) +
   geom_bar(stat = "identity", position = "dodge", width = 0.75) +
   geom_errorbar(aes(ymin = FRAPavg2 - FRAPse2, ymax = FRAPavg2 + FRAPse2), width = 0.2, position = position_dodge(0.75), size = 0.5) +
   labs(x="", y="FRAP") + 
-  ggtitle("FRAP Set2") +
+  ggtitle("Total antioxidant potential (μmol/g of tissue) set2") +
   scale_y_continuous(expand = c(0,0)) + 
   theme_minimal() +
   theme(axis.line = element_line(), axis.text.x = element_text(size = 12, angle = 30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, colour = "black"), axis.title.y = element_text(size = 15))
@@ -291,7 +291,7 @@ f_p2 = ggplot(FRAP, aes(x=Site, y=dFRAPavg)) + # establishing whats going on in 
   geom_bar(stat = "identity", color = "black", size = 0.3, width = 0.5) + # bar plot in these sizes, shapes, colors, etc
   geom_errorbar(aes(x=Site, ymin = dFRAPavg - dFRAPse, ymax = dFRAPavg + dFRAPse), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bar in specific size, shape, color, etc
   geom_text(label = c("A", "B", "AB", "A"), aes(y = c(0.1, 0.05, 0.05, 0.21), x = Site), size = 4) + # adding letters to indicate significance 
-  ylab("Change in FRAP") + xlab("") + # x and y axes titles
+  ylab("Change in total antioxidant potential (μmol/g of tissue)") + xlab("") + # x and y axes titles
   #ggtitle("Delta Condition Index") + # figure title 
   geom_hline(aes(yintercept = 0)) + # making the bars sit flush with the x axis
   scale_y_continuous(expand = c(0,0), limits = c(-0.4, 0.3)) + 
@@ -303,7 +303,7 @@ f_p2
 
 ##putting graphs into grid format 
 FRAP_Plots <- ggarrange(f_p1, f_p2, labels = c("A", "B"))
-ggsave("~/Desktop/HT_FRAP_Set1_delta_plot.pdf", FRAP_Plots, width = 8, height = 6)
+ggsave("~/Desktop/PutnamLab/Repositories/Oysters_EnvHistory/output/Phys/HT_FRAP_Set1_delta_plot.pdf", FRAP_Plots, width = 8, height = 6)
 
 
 

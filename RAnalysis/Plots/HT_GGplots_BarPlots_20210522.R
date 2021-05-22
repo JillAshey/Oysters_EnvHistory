@@ -1,23 +1,22 @@
 ##GGplots for honors thesis into manuscript
-#040220
+#102120
 
 
-
-##Set 1
-#reading in data
-dat1 = read.csv(file="~/Desktop/Coding/R/HT/csv_files/Physiology_WQ/HT_PhysWQ_Set1_051620.csv", header=TRUE) #file is now likely named HT_PhysWQ_Set1_051620
-View(dat1)
 
 #need to run ggplot
-install.packages("devtools")
-install.packages("ggpubr")
+#install.packages("devtools")
+#install.packages("ggpubr")
 library(devtools)
 library(ggplot2)
 library(ggpubr)
 library(gridExtra)
 library("plotrix")
-# install.packages("devtools")---- didn't work once 
-devtools::install_github("tidyverse/reprex")
+library("tidyverse")
+
+##Set 1
+#reading in data
+dat1 = read.csv(file="~/Desktop/PutnamLab/Repositories/Oysters_EnvHistory/data/Physiology_WQ/HT_PhysWQ_Set1_051620.csv", header=TRUE) 
+View(dat1)
 
 ##Set 1 - Glycogen
 # calculate the glycogen average and SE to include in data frame to be put into ggplot
@@ -49,12 +48,15 @@ p1 = ggplot(set1Gly, aes(x=name, y=value)) + #establishing what's going on the p
   geom_bar(stat = "identity", fill="gray", color = "black", size = 0.3, width = 0.5) + #its going to be a bar plot in these sizes, shapes, colors, etc
   geom_errorbar(aes(x=name, ymin = value - se, ymax = value + se), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bars in specific size, shape, color, etc
   ylab("Glycogen (% of DW)") + xlab("") + #x and y axes titles 
-  ggtitle("Glycogen - Set1") + #title 
+  #ggtitle("Glycogen - Set1") + #title 
   scale_y_continuous(expand = c(0,0)) + #making the bars sit right on the x axis-- no white space bt the bars and the actual axis
   theme_minimal() + #setting the background theme
-  theme(axis.line = element_line(), axis.text.x = element_text(size = 12, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, color = "black"), axis.title.y = element_text(size = 15)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+  theme(axis.line = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
 p1
 # no significance 
+
+
+
 
 ##Set 1 - Condition index
 # calculate the CI average and SE to include in data frame to be put into ggplot
@@ -81,12 +83,12 @@ set1CI = data.frame(name=c("Merroir", "Piankatank", "Urbanna Creek", "VIMS Pier"
 p2 = ggplot(set1CI, aes(x=name, y=value)) + #establishing what's going on the plot
   geom_bar(stat = "identity", fill="gray", color = "black", size = 0.3, width = 0.5) + # bar plot in these sizes, shapes, colors, etc
   geom_errorbar(aes(x=name, ymin = value - se, ymax = value + se), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bar in specific size, shape, color, etc
-  geom_text(label = c("A", "A", "A", "B"), aes(y = c(0.1, 0.1, 0.1, 1.0), x = name), size = 4) + # adding letters to indicate significant differences 
+  geom_text(label = c("A", "A", "A", "B"), aes(y = c(6.88, 7.91, 7.83, 4.89), x = name), size = 4) + # adding letters to indicate significant differences 
   ylab("Condition Index") + xlab("") + # titles for x and y axes
-  ggtitle("Condition Index - Set1") + # figure title 
-  scale_y_continuous(expand = c(0,0)) + #making the bars sit right on the x axis-- no white space bt the bars and the actual axis
+  #ggtitle("Condition Index - Set1") + # figure title 
+  scale_y_continuous(expand = c(0,0), limits = c(0,9)) + #making the bars sit right on the x axis-- no white space bt the bars and the actual axis
   theme_minimal() + #setting the background theme
-  theme(axis.line = element_line(), axis.text.x = element_text(size = 12, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, color = "black"), axis.title.y = element_text(size = 15)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+  theme(axis.line = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
 p2
 # significance labels: A, A, A, B
 
@@ -99,7 +101,7 @@ p2
 #Set 2
 
 #reading in data
-dat2 = read.csv(file="~/Desktop/Coding/R/HT/csv_files/Physiology_WQ/HT_PhysWQ_Set2_051620.csv", header=TRUE) #file is now likely named HT_PhysWQ_Set1_051620
+dat2 = read.csv(file="~/Desktop/PutnamLab/Repositories/Oysters_EnvHistory/data/Physiology_WQ/HT_PhysWQ_Set2_051620.csv", header=TRUE) 
 View(dat2)
 
 
@@ -128,14 +130,16 @@ set2Gly = data.frame(name=c("Merroir", "Piankatank", "Urbanna Creek", "VIMS Pier
                      se = c(MR2_gly_se, PR2_gly_se, UC2_gly_se, VP2_gly_se)) # std error 
 
 #bar plot for glycogen set 2
-ggplot(set2Gly, aes(x=name, y=value)) + # establishes whats going on in plot 
-  geom_bar(stat = "identity", fill="gray", color = "black", size = 0.3, width = 0.75) + # bar plot in these sizes, shapes, colors, etc
+p_GlySet2 <- ggplot(set2Gly, aes(x=name, y=value)) + # establishes whats going on in plot 
+  geom_bar(stat = "identity", fill="gray", color = "black", size = 0.3, width = 0.5) + # bar plot in these sizes, shapes, colors, etc
   geom_errorbar(aes(x=name, ymin = value - se, ymax = value + se), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bar in specific size, shape, color, etc
-  ylab("Glycogen Content") + xlab("") + # titles for x and y axes
-  ggtitle("Glycogen - Set2") + # figure title 
+  ylab("Glycogen (% of DW)") + xlab("") + #x and y axes titles 
+  #ggtitle("Glycogen - Set2") + # figure title 
   scale_y_continuous(expand = c(0,0)) + # making the bars sit flush with the x axis
   theme_minimal() + # setting background theme
   theme(axis.line = element_line(), axis.text.x = element_text(size = 12, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, color = "black"), axis.title.y = element_text(size = 15)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+p_GlySet2
+ggsave("~/Desktop/PutnamLab/Repositories/Oysters_EnvHistory/output/Phys/HT_Glycogen_Set2.pdf", p_GlySet2, width = 8, height = 6)
 
 
 ##Delta glycogen
@@ -164,10 +168,10 @@ p3 = ggplot(set2DeltaGly, aes(x=name, y=value)) + # establishes whats going on i
   geom_errorbar(aes(x=name, ymin = value - se, ymax = value + se), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bar in specific size, shape, color, etc
   #geom_text(label = c("A", "A", "A", "A"), aes(y = c(1.5, 7.3, 4.0, 11.0), x = name), size = 6) +
   ylab("Change in Glycogen Content") + xlab("") + # titles for x and y axes
-  ggtitle("Delta Glycogen") + # figure title 
+  #ggtitle("Delta Glycogen") + # figure title 
   geom_hline(aes(yintercept = 0)) + # making the bars sit flush with the x axis
   theme_minimal() + # setting background theme
-  theme(axis.line.y = element_line(), axis.text.x = element_text(size = 12, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, color = "black"), axis.title.y = element_text(size = 15)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+  theme(axis.line.y = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
 #do I need to include the letter designations in a case where nothing is significant? -- NO
 p3
 
@@ -194,14 +198,18 @@ set2CI = data.frame(name=c("Merroir", "Piankatank", "Urbanna Creek", "VIMS Pier"
                     se = c(MR2_CI_se, PR2_CI_se, UC2_CI_se, VP2_CI_se)) # std error
 
 #Bar plot of CI set2
-ggplot(set2CI, aes(x=name, y=value)) + # establishing whats going on in plot
+p_CISet2 <- ggplot(set2CI, aes(x=name, y=value)) + # establishing whats going on in plot
   geom_bar(stat = "identity", fill="gray", color = "black", size = 0.3, width = 0.5) +  # bar plot in these sizes, shapes, colors, etc
   geom_errorbar(aes(x=name, ymin = value - se, ymax = value + se), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bar in specific size, shape, color, etc
+  geom_text(label = c("AB", "AB", "A", "B"), aes(y = c(5.7, 5.7, 6.6, 5.25), x = name), size = 4) + # adding letters to indicate significance 
   ylab("Condition Index") + xlab("") + # x and y axes titles 
-  ggtitle("Condition Index Set2") + # figure title 
+  #ggtitle("Condition Index Set2") + # figure title 
   scale_y_continuous(expand = c(0,0)) + # making the bars sit flush with the x axis
+  expand_limits(y = 7) + 
   theme_minimal() + # setting background theme 
   theme(axis.line = element_line(), axis.text.x = element_text(size = 12, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, color = "black"), axis.title.y = element_text(size = 15)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+p_CISet2
+ggsave("~/Desktop/PutnamLab/Repositories/Oysters_EnvHistory/output/Phys/HT_ConditionIndex_Set2.pdf", p_CISet2, width = 8, height = 6)
 
 
 ##Delta CI
@@ -228,24 +236,27 @@ set2DeltaCI = data.frame(name=c("Merroir", "Piankatank", "Urbanna Creek", "VIMS 
 p4 = ggplot(set2DeltaCI, aes(x=name, y=value)) + # establishing whats going on in plot
   geom_bar(stat = "identity", fill="gray", color = "black", size = 0.3, width = 0.5) + # bar plot in these sizes, shapes, colors, etc
   geom_errorbar(aes(x=name, ymin = value - se, ymax = value + se), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bar in specific size, shape, color, etc
-  geom_text(label = c("A", "B", "AB", "C"), aes(y = c(0.1, 0.1, 0.1, 1.0), x = name), size = 4) + # adding letters to indicate significance 
+  geom_text(label = c("A", "B", "AB", "C"), aes(y = c(0.15, 0.15, 0.15, 0.86), x = name), size = 4) + # adding letters to indicate significance 
   ylab("Change in Condition Index") + xlab("") + # x and y axes titles
-  ggtitle("Delta Condition Index") + # figure title 
+  #ggtitle("Delta Condition Index") + # figure title 
   geom_hline(aes(yintercept = 0)) + # making the bars sit flush with the x axis
   theme_minimal() + # setting background theme
-  theme(axis.line.y = element_line(), axis.text.x = element_text(size = 12, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, color = "black"), axis.title.y = element_text(size = 15)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+  theme(axis.line.y = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
 p4
 #signifance indicators: A B AB C
 
 
 ##putting graphs into grid format by physiological variable
 # Glycogen - gly set1 and delta gly
-ggarrange(p1, p3, labels = c("A", "B"))
-ggsave("~/Desktop/HT_gly_Set1_delta_plot", device = "png", width = 6, height = 7, dpi = 500)
+gly_Plots <- ggarrange(p1, p3, labels = c("A", "B"))
+ggsave("~/Desktop/HT_gly_Set1_delta_plot.pdf", gly_Plots, width = 8, height = 6)
 
-# Glycogen - gly set1 and delta gly
-ggarrange(p2, p4, labels = c("A", "B"))
-ggsave("~/Desktop/HT_CI_Set1_delta_plot", device = "png", width = 6, height = 7, dpi = 500)
+# CI - CI set1 and delta CI
+CI_Plots <- ggarrange(p2, p4, labels = c("A", "B"))
+ggsave("~/Desktop/HT_CI_Set1_delta_plot.pdf", CI_Plots, width = 8, height = 6)
+
+
+
 
 
 #####FRAP ggplots 
@@ -253,7 +264,7 @@ ggsave("~/Desktop/HT_CI_Set1_delta_plot", device = "png", width = 6, height = 7,
 ##FRAP - set 1
 ##only need the averages for the plots 
 #Load data file with only avg and SE for each site. If I need all the points I can use HT_FRAP_bothSets_042320.csv
-FRAP <- read.csv("~/Desktop/Coding/R/HT/csv_files/FRAP/HT_FRAP_Siteavgs_043020.csv")
+FRAP <- read.csv("~/Desktop/PutnamLab/Repositories/Oysters_EnvHistory/data/FRAP/HT_FRAP_Siteavgs_043020.csv")
 View(FRAP)
 #gives me this warning when I load data file:
 # Warning message:
@@ -262,45 +273,48 @@ View(FRAP)
 #not sure what it means, but did not affect plots
 
 ##FRAP - set 1
-f_p1 = ggplot(data = FRAP, aes(x=Site, y=FRAPavg1)) +
-  geom_bar(stat = "identity", position= "dodge", width = 0.75) +
-  labs(y="FRAP", x="") +
-  ggtitle("FRAP Set1") +
+f_p1 = ggplot(FRAP, aes(x=Site, y=FRAPavg1)) + #establishing what's going on the plot
+  geom_bar(stat = "identity", color = "black", size = 0.3, width = 0.5) + # bar plot in these sizes, shapes, colors, etc
   geom_errorbar(aes(ymin = FRAPavg1 - FRAPse1, ymax = FRAPavg1 + FRAPse1), width = 0.2, position = position_dodge(0.75), size = 0.5) +
-  scale_y_continuous(expand = c(0,0)) + 
-  theme_minimal() +
-  theme(axis.line = element_line(), axis.text.x = element_text(size = 12, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, color = "black"), axis.title.y = element_text(size = 15))
+  ylab("Total antioxidant potential (μmol/g of tissue)") + xlab("") + # titles for x and y axes
+  #ggtitle("FRAP set1" - Set1") + # figure title 
+  scale_y_continuous(expand = c(0,0), limits = c(0, 1.35)) + #making the bars sit right on the x axis-- no white space bt the bars and the actual axis
+  theme_minimal() + #setting the background theme
+  theme(axis.line = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+f_p1
 
 
 ##FRAP - set 2
-ggplot(data = FRAP, aes(x=Site, y=FRAPavg2)) +
+p_FRAPSet2 <- ggplot(data = FRAP, aes(x=Site, y=FRAPavg2)) +
   geom_bar(stat = "identity", position = "dodge", width = 0.75) +
   geom_errorbar(aes(ymin = FRAPavg2 - FRAPse2, ymax = FRAPavg2 + FRAPse2), width = 0.2, position = position_dodge(0.75), size = 0.5) +
-  labs(x="", y="FRAP") + 
-  ggtitle("FRAP Set2") +
+  ylab("Total antioxidant potential (μmol/g of tissue)") + xlab("") + # titles for x and y axes
+  #ggtitle("Total antioxidant potential (μmol/g of tissue) set2") +
   scale_y_continuous(expand = c(0,0)) + 
   theme_minimal() +
   theme(axis.line = element_line(), axis.text.x = element_text(size = 12, angle = 30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, colour = "black"), axis.title.y = element_text(size = 15))
+p_FRAPSet2
+ggsave("~/Desktop/PutnamLab/Repositories/Oysters_EnvHistory/output/Phys/HT_FRAP_Set2.png", p_FRAPSet2, width = 8, height = 6)
 
 
 ##delta FRAP
-f_p2 = ggplot(data = FRAP, aes(x=Site, y=dFRAPavg,
-                            ymin = dFRAPavg - dFRAPse, ymax = dFRAPavg + dFRAPse)) + 
-  geom_bar(stat = "identity", position= "dodge", width = 0.75) +
-  labs(y="Change in FRAP", x="") + 
-  ggtitle("Delta FRAP") +
-  geom_errorbar(width = 0.2, position = position_dodge(0.75), size = 0.5) +
-  geom_text(label = c("A", "B", "AB", "A"), aes(y = dFRAPavg + dFRAPse, x = Site), vjust = -0.5, size = 6) +
-  scale_y_continuous(expand = c(0,0)) + 
-  geom_hline(aes(yintercept = 0)) +
-  ylim(-0.4, 0.3) +
-  theme_minimal() +
-  theme(axis.line.y = element_line(), axis.text.x = element_text(size = 12, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, color = "black"), axis.title.y = element_text(size = 15))
-#A B AB A
+f_p2 = ggplot(FRAP, aes(x=Site, y=dFRAPavg)) + # establishing whats going on in plot
+  geom_bar(stat = "identity", color = "black", size = 0.3, width = 0.5) + # bar plot in these sizes, shapes, colors, etc
+  geom_errorbar(aes(x=Site, ymin = dFRAPavg - dFRAPse, ymax = dFRAPavg + dFRAPse), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bar in specific size, shape, color, etc
+  geom_text(label = c("A", "B", "AB", "A"), aes(y = c(0.1, 0.05, 0.05, 0.21), x = Site), size = 4) + # adding letters to indicate significance 
+  ylab("Change in total antioxidant potential (μmol/g of tissue)") + xlab("") + # x and y axes titles
+  #ggtitle("Delta Condition Index") + # figure title 
+  geom_hline(aes(yintercept = 0)) + # making the bars sit flush with the x axis
+  scale_y_continuous(expand = c(0,0), limits = c(-0.4, 0.3)) + 
+  theme_minimal() + # setting background theme
+  theme(axis.line.y = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+f_p2
+# sig values: A, B, AB, A
+
 
 ##putting graphs into grid format 
-ggarrange(f_p1, f_p2, labels = c("A", "B"))
-ggsave("~/Desktop/HT_FRAP_Set1_delta_plot", device = "png", width = 6, height = 7, dpi = 500)
+FRAP_Plots <- ggarrange(f_p1, f_p2, labels = c("A", "B"))
+ggsave("~/Desktop/PutnamLab/Repositories/Oysters_EnvHistory/output/Phys/HT_FRAP_Set1_delta_plot.pdf", FRAP_Plots, width = 8, height = 6)
 
 
 

@@ -6,6 +6,7 @@
 library(car)
 library(rcompanion)
 library(multcomp)
+library(nlme)
 
 ####Set 1
 #Load data set in
@@ -96,7 +97,7 @@ summary(test)
 
 #######Set 2
 #load data in
-set2<-read.csv("HT_CIGly_Set2.csv", head=T)
+set2<-read.csv("~/Desktop/PutnamLab/Repositories/Oysters_EnvHistory/data/Glycogen_CI/HT_CIGly_Set2.csv", head=T)
 set2$Site<-as.factor(set2$Site)
 
 
@@ -104,7 +105,7 @@ set2$Site<-as.factor(set2$Site)
 #Based on normality assessments (see R file normalityTests and/or Normality excel file), I'll be using the log transformed glycogen variable in analysis
 
 #make linear model with glycogen as a function of site
-fit2 <-lm(g_log~Site, na.action = na.exclude, data=set2)
+fit2 <-lm(P_Glycogen_DW~Site, na.action = na.exclude, data=set2)
 summary(fit2) #model summary
 require(car)
 #ANOVA to see if there are any significant differences in glycogen among sites
@@ -137,7 +138,7 @@ summary(test)
 
 ##FRAP - set 2
 #Load data
-frap<-read.csv("FRAP_HT.csv", head=T)
+frap<-read.csv("~/Desktop/PutnamLab/Repositories/Oysters_EnvHistory/data/FRAP/HT_FRAP_bothSets_042320.csv", head=T)
 frap$Treatment<-as.factor(frap$Treatment)
 ###In this data set, I'm using the variables test_FRAP and test_FRAP_delta--> changed units on 4/32/20
 #Based on normality assessments (see R file normalityTests and/or Normality excel file), I'll be using the untransformed FRAP variable in analysis

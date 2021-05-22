@@ -1,13 +1,33 @@
-#J.Ashey working off A.Schatz - working off of E. Rivest's Code
-#Two-way ANOVA for FRAP HT
-#2/25/19
+# Title: FRAP stats and plotting 
+# Project: Oyster Env Histrory 
+# Author: J. Ashey
+# Date: 20210502
 
-
-#my code
-FRAP=read.table("FRAP_HT.csv", header=T, sep=",")
-FRAP$Treatment<-as.factor(FRAP$Treatment)
-
+#Install and Load necessary libraries
+library(devtools)
+library(ggplot2)
+library(ggpubr)
+library(gridExtra)
+library(readr)
+library("plotrix")
 library(car)
+# install.packages("devtools")---- didn't work once 
+#devtools::install_github("tidyverse/reprex")
+if("lubridate" %in% rownames(installed.packages()) == 'FALSE') install.packages('lubridate') 
+if("tidyverse" %in% rownames(installed.packages()) == 'FALSE') install.packages('tidyverse') 
+if("emmeans" %in% rownames(installed.packages()) == 'FALSE') install.packages('emmeans') 
+if("gridExtra" %in% rownames(installed.packages()) == 'FALSE') install.packages('gridExtra') 
+library(lubridate)
+library(tidyverse)
+library(emmeans)
+library(gridExtra)
+
+# Read in data 
+FRAP <- read_csv("~/Desktop/PutnamLab/Repositories/Oysters_EnvHistory/data/FRAP/HT_FRAP_bothSets_042320.csv")
+
+#J.Ashey working off A.Schatz - working off of E. Rivest's Code
+#my code
+FRAP$Treatment<-as.factor(FRAP$Treatment)
 
 FRAP_proximal = FRAP[1:56,]
 FRAP_distal = FRAP[57:112,]
