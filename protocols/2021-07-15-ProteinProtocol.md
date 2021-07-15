@@ -20,6 +20,10 @@ This protocol is from the ThermoScientific Pierce BCA Protein Assay Kit. User gu
 
 ##### 1) Prepare standards 
 
+Use the table below (from the BSA user guide) to make standards.
+
+![](https://github.com/JillAshey/Oysters_EnvHistory/blob/main/images/BSA_ProteinStandards.jpeg?raw=true)
+
 ##### 2) Prepare working reagent.  
 
 - Use the following formula to determine total volume of working reagent needed: 
