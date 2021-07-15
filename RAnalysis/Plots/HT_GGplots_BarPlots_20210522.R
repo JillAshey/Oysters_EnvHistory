@@ -16,7 +16,7 @@ library("tidyverse")
 ##Set 1
 #reading in data
 dat1 = read.csv(file="~/Desktop/PutnamLab/Repositories/Oysters_EnvHistory/data/Physiology_WQ/HT_PhysWQ_Set1_051620.csv", header=TRUE) 
-View(dat1)
+#View(dat1)
 
 ##Set 1 - Glycogen
 # calculate the glycogen average and SE to include in data frame to be put into ggplot
