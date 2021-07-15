@@ -65,6 +65,6 @@ Remove cap from falcon tube, cover top of tube with aluminum foil, and poke smal
 - Using a 96-well plate, add 20µL of sample or standard to each well. 
 - Using a multi-channel pipette, add 130µL of KI2CaCl2 to each well. Pipette up and down to mix reagent solution and samples/standard. 
 - Once all wells are filled, cover plate and incubate in a drawer at room temperature for 30 minutes. 
-- Place plate on plate reader and measure glycogen concentrations with settings of 450nm with 60 seconds of lateral shaking. 
+- Place plate on plate reader, shake plate laterally for 60 seconds, and measure absorbance at 450nm. 
 
 
