@@ -5,6 +5,9 @@ date: '2021-07-15'
 projects: Oyster Environmental History  
 ---
 
+### Glycogen Protocol
+
+
 This protocol is adapted from [Guevelou and Allen 2016](https://www.sciencedirect.com/science/article/abs/pii/S0044848616301338). 
 
 
