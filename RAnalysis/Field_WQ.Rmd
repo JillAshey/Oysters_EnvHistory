@@ -1,0 +1,1846 @@
+---
+title: "Field WQ"
+author: "jillashey"
+date: "7/16/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load libraries
+library(car)
+library(rcompanion)
+library(gdata)
+library(multcomp)
+library(nlme)
+library(MASS)
+library(lme4)
+library(FSA)
+library(tidyverse)
+```
+
+# Read in data 
+```{r}
+field_WQ <- read.csv("data/WQ/HT_FieldWaterQuality.csv", header = T)
+head(field_WQ)
+```
+
+# Evaluate normality for all WQ variables 
+
+Evaluate normality using histograms, Levene's test, Bartlett test, and QQplots.
+- Levene's test: more robust to departures from normality than Bartlett's test; p>0.05 means the variances are equal
+- Bartlett test: If the data is normally distributed, this is the best test to use. It is more likely to return a "false positive" when the data is non-normal; p>0.05 means the variances are equal
+- Q-Q plot: tests the hypothesis that the data is normally distributed.  If the points on the plot are reasonably well approximated by a straight line, the popular Gaussian data hypothesis is plausible, while marked deviations from linearity provide evidence against this hypothesis and these data points should be removed.  
+
+```{r}
+## Temperature 
+# Evaluate normality
+hist(field_WQ$Temperature)
+plotNormalHistogram(field_WQ$Temperature)
+leveneTest(Temperature~Site, data=field_WQ) #normal
+bartlett.test(Temperature~Site, data=field_WQ) #normal
+fit<-lm(Temperature~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+t_log = log(field_WQ$Temperature)
+plotNormalHistogram(t_log)
+t_sqrt = sqrt(field_WQ$Temperature)
+plotNormalHistogram(t_sqrt) 
+t_cube= sign(field_WQ$Temperature) * abs(field_WQ$Temperature)^(1/3)
+plotNormalHistogram(t_cube) 
+t_recp = 1/(field_WQ$Temperature)
+plotNormalHistogram(t_recp)
+# Based on initial histograms, sqrt and cube look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+field_WQ = cbind(field_WQ, t_sqrt, t_cube)
+
+# Evaluate normality in sqrt transformed temperature 
+leveneTest(t_sqrt~Site, data=field_WQ) #normal
+fit<-lm(t_sqrt~Site, data=field_WQ)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+#similar s-shape to the untransformed variable
+
+# Evaluate normality in cubed transformed temperature 
+leveneTest(t_cube~Site, data=field_WQ) #normal
+fit<-lm(t_cube~Site, data=field_WQ)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+## Not enough justification to transform - NO TRANSFORM in temperature
+```
+
+```{r}
+## Salinity 
+# Evaluate normality
+hist(field_WQ$Salinity)
+plotNormalHistogram(field_WQ$Salinity)
+leveneTest(Salinity~Site, data=field_WQ) #normal
+bartlett.test(Salinity~Site, data=field_WQ) #not normal
+fit<-lm(Salinity~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+Slog = log(field_WQ$Salinity)
+plotNormalHistogram(Slog)
+Ssqrt = sqrt(field_WQ$Salinity)
+plotNormalHistogram(Ssqrt)
+Scube= sign(field_WQ$Salinity) * abs(field_WQ$Salinity)^(1/3)
+plotNormalHistogram(Scube)
+Srecp = 1/(field_WQ$Salinity)
+plotNormalHistogram(Srecp)
+# Based on initial histograms, log, sqrt and cube look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+field_WQ = cbind(field_WQ, Slog, Ssqrt, Scube)
+
+# Evaluate normality in log transformed salinity 
+leveneTest(Slog~Site, data=field_WQ) #normal - but barely
+plotNormalHistogram(field_WQ$Slog)
+bartlett.test(Slog~Site, data=field_WQ) #not normal
+fit<-lm(Slog~Site, data=field_WQ)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in sqrt transformed salinity 
+leveneTest(Ssqrt~Site, data=field_WQ) #normal
+plotNormalHistogram(field_WQ$Ssqrt)
+bartlett.test(Ssqrt~Site, data=field_WQ) #not normal
+fit<-lm(Ssqrt~Site, data=field_WQ)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in cube transformed salinity 
+leveneTest(Scube~Site, data=field_WQ) #normal
+plotNormalHistogram(field_WQ$Scube)
+bartlett.test(Scube~Site, data=field_WQ) #not normal
+fit<-lm(Scube~Site, data=field_WQ)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+## Not enough justification to transform - NO TRANSFORM in salinity
+```
+
+```{r}
+## Spec pH
+# Evaluate normality
+hist(field_WQ$specpH)
+plotNormalHistogram(field_WQ$specpH)
+leveneTest(specpH~Site, data=field_WQ) # normal
+bartlett.test(specpH~Site, data=field_WQ) # normal 
+fit<-lm(specpH~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##pretty good fit all things considered 
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+pHlog = log(field_WQ$specpH) 
+plotNormalHistogram(pHlog)
+pHsqrt = sqrt(field_WQ$specpH) 
+plotNormalHistogram(pHsqrt)
+pHcube= sign(field_WQ$specpH) * abs(field_WQ$specpH)^(1/3)
+plotNormalHistogram(pHcube)
+pHrecp = 1/(field_WQ$specpH) 
+plotNormalHistogram(pHrecp)
+# Based on initial histograms, log, sqrt and cube look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+field_WQ = cbind(field_WQ, pHlog, pHsqrt, pHcube)
+
+# Evaluate normality in log transformed spec pH 
+leveneTest(pHlog~Site, data=field_WQ) # normal
+bartlett.test(pHlog~Site, data=field_WQ) # not normal 
+fit<-lm(pHlog~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in sqrt transformed spec pH 
+leveneTest(pHsqrt~Site, data=field_WQ) # normal
+bartlett.test(pHsqrt~Site, data=field_WQ) # normal 
+fit<-lm(pHsqrt~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in cube transformed spec pH 
+leveneTest(pHcube~Site, data=field_WQ) # normal
+bartlett.test(pHcube~Site, data=field_WQ) # not normal - but barely 
+fit<-lm(pHcube~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+## Not enough justification to transform - NO TRANSFORM in spec pH
+```
+
+```{r}
+## DO mg/L
+hist(field_WQ$DO_mg)
+plotNormalHistogram(field_WQ$DO_mg)
+leveneTest(DO_mg~Site, data=field_WQ) # normal
+bartlett.test(DO_mg~Site, data=field_WQ) # normal 
+fit<-lm(DO_mg~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+DOlog = log(field_WQ$DO_mg) 
+plotNormalHistogram(DOlog)
+DOsqrt = sqrt(field_WQ$DO_mg) 
+plotNormalHistogram(DOsqrt) 
+DOcube= sign(field_WQ$DO_mg) * abs(field_WQ$DO_mg)^(1/3) 
+plotNormalHistogram(DOcube) 
+DOrecp = 1/(field_WQ$DO_mg) 
+plotNormalHistogram(DOrecp)
+# Based on initial histograms, log, sqrt and cube look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set
+field_WQ = cbind(field_WQ, DOlog, DOsqrt, DOcube)
+
+# Evaluate normality in log transformed spec pH 
+leveneTest(DOlog~Site, data=field_WQ) # normal
+bartlett.test(DOlog~Site, data=field_WQ) # normal 
+fit<-lm(DOlog~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in sqrt transformed spec pH 
+leveneTest(DOsqrt~Site, data=field_WQ) # normal
+bartlett.test(DOsqrt~Site, data=field_WQ) # normal 
+fit<-lm(DOsqrt~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in cube transformed spec pH 
+leveneTest(DOcube~Site, data=field_WQ) # normal
+bartlett.test(DOcube~Site, data=field_WQ) # normal
+fit<-lm(DOcube~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+## Not enough justification to transform - NO TRANSFORM in DO_mg
+```
+
+```{r}
+## Total alkalinity 
+hist(field_WQ$TA)
+plotNormalHistogram(field_WQ$TA)
+leveneTest(TA~Site, data=field_WQ) # normal
+bartlett.test(TA~Site, data=field_WQ) # not normal
+fit<-lm(TA~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+#decent fit
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+TAlog = log(field_WQ$TA) 
+plotNormalHistogram(TAlog)
+TAsqrt = sqrt(field_WQ$TA) 
+plotNormalHistogram(TAsqrt) 
+TAcube = sign(field_WQ$TA) * abs(field_WQ$TA)^(1/3) 
+plotNormalHistogram(TAcube) 
+TArecp = 1/(field_WQ$TA) 
+plotNormalHistogram(TArecp)
+# Based on initial histograms, log, sqrt and cube look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set
+field_WQ = cbind(field_WQ, TAlog, TAsqrt, TAcube)
+
+# Evaluate normality in log transformed TA
+leveneTest(TAlog~Site, data=field_WQ) # normal
+bartlett.test(TAlog~Site, data=field_WQ) # not normal 
+fit<-lm(TAlog~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in sqrt transformed TA 
+leveneTest(TAsqrt~Site, data=field_WQ) # normal
+bartlett.test(TAsqrt~Site, data=field_WQ) # not normal 
+fit<-lm(TAsqrt~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in cube transformed TA 
+leveneTest(TAcube~Site, data=field_WQ) # normal
+bartlett.test(TAcube~Site, data=field_WQ) # not normal
+fit<-lm(TAcube~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+## Not enough justification to transform - NO TRANSFORM in TA
+```
+
+```{r}
+###pCO2
+hist(field_WQ$pCO2)
+plotNormalHistogram(field_WQ$pCO2)
+leveneTest(pCO2~Site, data=field_WQ) # normal
+bartlett.test(pCO2~Site, data=field_WQ) # not normal
+fit<-lm(pCO2~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+pCO2log = log(field_WQ$pCO2) 
+plotNormalHistogram(pCO2log) 
+pCO2sqrt = sqrt(field_WQ$pCO2) 
+plotNormalHistogram(pCO2sqrt) 
+pCO2cube= sign(field_WQ$pCO2) * abs(field_WQ$pCO2)^(1/3) 
+plotNormalHistogram(pCO2cube) 
+pCO2recp = 1/(field_WQ$pCO2) 
+plotNormalHistogram(pCO2recp) 
+# Based on initial histograms, log, cube, and recp look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set
+field_WQ = cbind(field_WQ, pCO2log, pCO2cube, pCO2recp)
+
+# Evaluate normality in log transformed pCO2
+leveneTest(pCO2log~Site, data=field_WQ) # normal
+bartlett.test(pCO2log~Site, data=field_WQ) # normal 
+fit<-lm(pCO2log~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in cube transformed pCO2
+leveneTest(pCO2cube~Site, data=field_WQ) # normal
+bartlett.test(pCO2cube~Site, data=field_WQ) # normal 
+fit<-lm(pCO2cube~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in recp transformed pCO2
+leveneTest(pCO2recp~Site, data=field_WQ) # normal
+bartlett.test(pCO2recp~Site, data=field_WQ) # normal 
+fit<-lm(pCO2recp~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+## ????
+```
+
+```{r}
+## Omega Ca
+hist(field_WQ$Omega_Ca)
+plotNormalHistogram(field_WQ$Omega_Ca)
+leveneTest(Omega_Ca~Site, data=field_WQ) # normal
+bartlett.test(Omega_Ar~Site, data=field_WQ) # not normal
+fit<-lm(Omega_Ca~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+Calog = log(field_WQ$Omega_Ca) 
+plotNormalHistogram(Calog) 
+Casqrt = sqrt(field_WQ$Omega_Ca) 
+plotNormalHistogram(Casqrt) 
+Cacube= sign(field_WQ$Omega_Ca) * abs(field_WQ$Omega_Ca)^(1/3) 
+plotNormalHistogram(Cacube) 
+Carecp = 1/(field_WQ$Omega_Ca) 
+plotNormalHistogram(Carecp) 
+# Based on initial histograms, log, sqrt, and cube look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set
+field_WQ = cbind(field_WQ, Calog, Casqrt, Cacube)
+
+# Evaluate normality in log transformed OmegaCa
+leveneTest(Calog~Site, data=field_WQ) # normal
+bartlett.test(Calog~Site, data=field_WQ) # not normal 
+fit<-lm(Calog~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in log transformed OmegaCa
+leveneTest(Calog~Site, data=field_WQ) # normal
+bartlett.test(Calog~Site, data=field_WQ) # not normal 
+fit<-lm(Calog~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in sqrt transformed OmegaCa
+leveneTest(Casqrt~Site, data=field_WQ) # normal
+bartlett.test(Casqrt~Site, data=field_WQ) # not normal 
+fit<-lm(Casqrt~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in cube transformed OmegaCa
+leveneTest(Cacube~Site, data=field_WQ) # normal
+bartlett.test(Cacube~Site, data=field_WQ) # not normal 
+fit<-lm(Cacube~Site, data=field_WQ) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# ????
+```
+
+# Check if data contains any major outliers
+Identify outliers with Bonferroni test
+- Bonferroni test: null for the Bonferroni adjusted outlier test is the observation of an outlier. p<0.05 means no outliers.
+```{r}
+fit_temp<-lm(Temperature~Site, data=field_WQ)
+outlierTest(fit_temp) # no outliers - unadj p > 0.05 & Bonnferroni p NA
+
+fit_sal<-lm(Salinity~Site, data=field_WQ)
+outlierTest(fit_sal) # potential outliers? unadj p < 0.05 & Bonnferroni p > 0.05
+
+fit_spec<-lm(specpH~Site, data=field_WQ)
+outlierTest(fit_spec) # potential outliers? unadj p < 0.05 & Bonnferroni p < 0.05 
+
+fit_DOmg<-lm(DO_mg~Site, data=field_WQ)
+outlierTest(fit_DOmg) # potential outliers? unadj p < 0.05 & Bonnferroni p > 0.05 
+
+fit_TA<-lm(TA~Site, data=field_WQ)
+outlierTest(fit_TA) # potential outliers? unadj p < 0.05 & Bonnferroni p < 0.05
+
+fit_pCO2<-lm(pCO2~Site, data=field_WQ)
+outlierTest(fit_pCO2) # potential outliers? unadj p < 0.05 & Bonnferroni p < 0.05 
+
+fit_Ca<-lm(Omega_Ca~Site, data=field_WQ)
+outlierTest(fit_Ca) # potential outliers? unadj p < 0.05 & Bonnferroni p < 0.05 
+
+```
+
+# Run one-way ANOVAs to identify differences by site 
+#### Comparing distal sites: MR, PR, UC, VP
+```{r}
+#field_WQ$Site<-as.factor(field_WQ$Site)
+
+# Filter by site 
+MR <- filter(field_WQ, Site  == "MR")
+PR <- filter(field_WQ, Site  == "PR")
+UC <- filter(field_WQ, Site  == "UC")
+VP <- filter(field_WQ, Site  == "VP")
+VP_2 <- filter(field_WQ, Site  == "VP-2")
+
+# Bind distal sites together in df 
+AllSite <- rbind(MR,PR,UC,VP)
+AllSite$Site <- as.factor(AllSite$Site)
+```
+
+## Compare field water quality by distal sites
+```{r}
+## Temperature 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Temperature~Site, na.action = na.exclude, data=AllSite)
+summary(fit2) # none significant
+Anova(fit2, type="III") # not significant
+kruskal.test(Temperature~Site, data=AllSite) # not significant
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Sqrt
+fit2 <-lm(t_sqrt~Site, na.action = na.exclude, data=AllSite)
+summary(fit2) # none significant
+Anova(fit2, type="III") # not significant
+kruskal.test(t_sqrt~Site, data=AllSite) # not significant
+
+# Cube
+fit2 <-lm(t_cube~Site, na.action = na.exclude, data=AllSite)
+summary(fit2) # none significant
+Anova(fit2, type="III") # not significant
+kruskal.test(t_cube~Site, data=AllSite) # not significant
+```
+
+```{r}
+## Salinity 
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Salinity~Site, na.action = na.exclude, data=AllSite)
+summary(fit2) # all comparisons significant
+Anova(fit2, type="III") # significant
+test_sal <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_sal) # significant comparisons by site 
+kruskal.test(Salinity~Site, data=AllSite) # signicant 
+dunnTest(Salinity~Site, data=AllSite) # Automatically fills in Holm method; significant comparisons by site
+
+# Second, I will do the ANOVA test using the transformed variables (log, sqrt, cube) to compare/check them to the untransformed 
+# Log
+fit2 <-lm(Slog~Site, na.action = na.exclude, data=AllSite)
+summary(fit2) # all comparisons significant
+Anova(fit2, type="III") # significant
+test_sal <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_sal) # significant comparisons by site
+kruskal.test(Slog~Site, data=AllSite) # significant
+dunnTest(Slog~Site, data=AllSite) # Automatically fills in Holm method; significant comparisons by site
+
+# Sqrt
+fit2 <-lm(Ssqrt~Site, na.action = na.exclude, data=AllSite)
+summary(fit2) # all comparisons significant
+Anova(fit2, type="III") # significant
+test_sal <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_sal) # significant comparisons by site
+kruskal.test(Ssqrt~Site, data=AllSite) # significant
+dunnTest(Ssqrt~Site, data=AllSite) # Automatically fills in Holm method; significant comparisons by site
+
+# Cube
+fit2 <-lm(Scube~Site, na.action = na.exclude, data=AllSite)
+summary(fit2) # all comparisons significant
+Anova(fit2, type="III") # significant
+test_sal <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_sal) # significant comparisons by site
+kruskal.test(Scube~Site, data=AllSite) # significant
+dunnTest(Scube~Site, data=AllSite) # Automatically fills in Holm method; significant comparisons by site
+```
+
+```{r}
+## spec pH
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(specpH~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(specpH~Site, data=AllSite) # not significant
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(pHlog~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # not significant 
+kruskal.test(pHlog~Site, data=AllSite) # not significant
+
+# Sqrt
+fit2 <-lm(pHsqrt~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(pHsqrt~Site, data=AllSite) # not significant
+
+# Cube
+fit2 <-lm(pHcube~Site, na.action = na.exclude, data=AllSite) 
+summary(fit2) # PR signficant
+Anova(fit2, type="III") # not significant 
+kruskal.test(pHcube~Site, data=AllSite) # not significant
+```
+
+```{r}
+## DO mg
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(DO_mg~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(DO_mg~Site, data=AllSite) # not significant
+
+# Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(DOlog~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(DOlog~Site, data=AllSite) # not significant
+
+# Log
+fit2 <-lm(DOsqrt~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(DOsqrt~Site, data=AllSite) # not significant
+
+# Cube
+fit2 <-lm(DOcube~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(DOcube~Site, data=AllSite) # not significant
+```
+
+```{r}
+## TA
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(TA~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # significant
+test <- glht(fit2, linfct = mcp(Site = "Tukey")) 
+summary(test) # significant comparisons by site
+kruskal.test(TA~Site, data=AllSite) # significant
+dunnTest(TA~Site, data=AllSite) # significant comparisons by site
+
+# Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(TAlog~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # significiant
+test <- glht(fit2, linfct = mcp(Site = "Tukey"))
+summary(test) # significant comparisons by site
+kruskal.test(TAlog~Site, data=AllSite) # significant
+dunnTest(TAlog~Site, data=AllSite) # significant comparisons by site
+
+# Sqrt
+fit2 <-lm(TAsqrt~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # significant
+test <- glht(fit2, linfct = mcp(Site = "Tukey"))
+summary(test) # significant comparisons by site
+kruskal.test(TAsqrt~Site, data=AllSite) # significant
+dunnTest(TAsqrt~Site, data=AllSite) # significant comparisons by site
+
+# Cube
+fit2 <-lm(TAcube~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # significant 
+test <- glht(fit2, linfct = mcp(Site = "Tukey"))
+summary(test) # significant comparisons by site
+kruskal.test(TAcube~Site, data=AllSite) # significant
+dunnTest(TAcube~Site, data=AllSite) # significant comparisons by site
+```
+
+```{r}
+# pCO2
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(pCO2~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # significant
+test <- glht(fit2, linfct = mcp(Site = "Tukey"))
+summary(test) # no significant comparisons by site 
+kruskal.test(pCO2~Site, data=AllSite) # not significant
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(pCO2log~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(pCO2log~Site, data=AllSite) # not significant
+
+# Cube
+fit2 <-lm(pCO2cube~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # significant
+test <- glht(fit2, linfct = mcp(Site = "Tukey"))
+summary(test) # no significant comparisons by site 
+kruskal.test(pCO2cube~Site, data=AllSite) # not significant
+
+# Reciprocal
+fit2 <-lm(pCO2recp~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # not significant 
+kruskal.test(pCO2recp~Site, data=AllSite) # not significant
+```
+
+```{r}
+##Omega Ca
+##First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Omega_Ca~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Omega_Ca~Site, data=AllSite) # significant
+dunnTest(Omega_Ca~Site, data=AllSite) # significant comparisons by site
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(Calog~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # significant
+test <- glht(fit2, linfct = mcp(Site = "Tukey"))
+summary(test) # significant comparisons by site
+kruskal.test(Calog~Site, data=AllSite) # significant
+dunnTest(Calog~Site, data=AllSite) # significant comparisons by site
+
+# Sqrt
+fit2 <-lm(Casqrt~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Casqrt~Site, data=AllSite) # significant
+dunnTest(Casqrt~Site, data=AllSite) # significant comparisons by site
+
+# Cube
+fit2 <-lm(Cacube~Site, na.action = na.exclude, data=AllSite)
+summary(fit2)
+Anova(fit2, type="III") # slightly significant
+test <- glht(fit2, linfct = mcp(Site = "Tukey"))
+summary(test) # significant comparisons by site
+kruskal.test(Cacube~Site, data=AllSite) # significant
+dunnTest(Cacube~Site, data=AllSite) # significant comparisons by site
+```
+
+
+#### Comparing MR and VP-2
+```{r}
+# Bind sites together in df 
+MR_VP2 <- rbind(MR,VP_2)
+MR_VP2$Site <- as.factor(MR_VP2$Site)
+```
+
+## Compare field water quality by MR and VP-2 sites
+
+```{r}
+## Temperature 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Temperature~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(Temperature~Site, data=MR_VP2) # significant
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Sqrt
+fit2 <-lm(t_sqrt~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(t_sqrt~Site, data=MR_VP2) # significant
+
+# Cube
+fit2 <-lm(t_cube~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(t_cube~Site, data=MR_VP2) # significant
+```
+
+```{r}
+## Salinity 
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Salinity~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(Salinity~Site, data=MR_VP2) # significant 
+
+# Second, I will do the ANOVA test using the transformed variables (log, sqrt, cube) to compare/check them to the untransformed 
+# Log
+fit2 <-lm(Slog~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(Slog~Site, data=MR_VP2) # significant
+
+# Sqrt
+fit2 <-lm(Ssqrt~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(Ssqrt~Site, data=MR_VP2) # significant
+
+# Cube
+fit2 <-lm(Scube~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(Scube~Site, data=MR_VP2) # significant
+```
+
+```{r}
+## spec pH
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(specpH~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(specpH~Site, data=MR_VP2) # not significant
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(pHlog~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant 
+kruskal.test(pHlog~Site, data=MR_VP2) # not significant
+
+# Sqrt
+fit2 <-lm(pHsqrt~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(pHsqrt~Site, data=MR_VP2) # not significant
+
+# Cube
+fit2 <-lm(pHcube~Site, na.action = na.exclude, data=MR_VP2) 
+summary(fit2) 
+Anova(fit2, type="III") # significant 
+kruskal.test(pHcube~Site, data=MR_VP2) # not significant
+```
+
+```{r}
+## DO mg
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(DO_mg~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DO_mg~Site, data=MR_VP2) # significant
+
+# Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(DOlog~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DOlog~Site, data=MR_VP2) # significant
+
+# Log
+fit2 <-lm(DOsqrt~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DOsqrt~Site, data=MR_VP2) # significant
+
+# Cube
+fit2 <-lm(DOcube~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DOcube~Site, data=MR_VP2) # significant
+```
+
+```{r}
+## TA
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(TA~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(TA~Site, data=MR_VP2) # not significant
+
+# Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(TAlog~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significiant
+kruskal.test(TAlog~Site, data=MR_VP2) # not significant
+
+# Sqrt
+fit2 <-lm(TAsqrt~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(TAsqrt~Site, data=MR_VP2) # not significant
+
+# Cube
+fit2 <-lm(TAcube~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant 
+kruskal.test(TAcube~Site, data=MR_VP2) # not significant
+```
+
+```{r}
+# pCO2
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(pCO2~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(pCO2~Site, data=MR_VP2) # significant
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(pCO2log~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(pCO2log~Site, data=MR_VP2) # significant
+
+# Cube
+fit2 <-lm(pCO2cube~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(pCO2cube~Site, data=MR_VP2) # significant
+
+# Reciprocal
+fit2 <-lm(pCO2recp~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant 
+kruskal.test(pCO2recp~Site, data=MR_VP2) # significant
+```
+
+```{r}
+##Omega Ca
+##First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Omega_Ca~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(Omega_Ca~Site, data=AllSite) # significant
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(Calog~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Calog~Site, data=MR_VP2) # not significant
+
+# Sqrt
+fit2 <-lm(Casqrt~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Casqrt~Site, data=MR_VP2) # significant
+
+# Cube
+fit2 <-lm(Cacube~Site, na.action = na.exclude, data=MR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Cacube~Site, data=MR_VP2) # not significant
+```
+
+
+#### Comparing PR and VP-2
+```{r}
+# Bind sites together in df 
+PR_VP2 <- rbind(PR,VP_2)
+PR_VP2$Site <- as.factor(PR_VP2$Site)
+```
+
+## Compare field water quality by MR and VP-2 sites
+
+```{r}
+## Temperature 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Temperature~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(Temperature~Site, data=PR_VP2) # significant
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Sqrt
+fit2 <-lm(t_sqrt~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(t_sqrt~Site, data=PR_VP2) # significant
+
+# Cube
+fit2 <-lm(t_cube~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(t_cube~Site, data=PR_VP2) # significant
+```
+
+```{r}
+## Salinity 
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Salinity~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(Salinity~Site, data=PR_VP2) # significant 
+
+# Second, I will do the ANOVA test using the transformed variables (log, sqrt, cube) to compare/check them to the untransformed 
+# Log
+fit2 <-lm(Slog~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(Slog~Site, data=PR_VP2) # significant
+
+# Sqrt
+fit2 <-lm(Ssqrt~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(Ssqrt~Site, data=PR_VP2) # significant
+
+# Cube
+fit2 <-lm(Scube~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(Scube~Site, data=PR_VP2) # significant
+```
+
+```{r}
+## spec pH
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(specpH~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(specpH~Site, data=PR_VP2) # not significant
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(pHlog~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant 
+kruskal.test(pHlog~Site, data=PR_VP2) # not significant
+
+# Sqrt
+fit2 <-lm(pHsqrt~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(pHsqrt~Site, data=PR_VP2) # not significant
+
+# Cube
+fit2 <-lm(pHcube~Site, na.action = na.exclude, data=PR_VP2) 
+summary(fit2) 
+Anova(fit2, type="III") # significant 
+kruskal.test(pHcube~Site, data=PR_VP2) # not significant
+```
+
+```{r}
+## DO mg
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(DO_mg~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DO_mg~Site, data=PR_VP2) # significant
+
+# Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(DOlog~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DOlog~Site, data=PR_VP2) # significant
+
+# Log
+fit2 <-lm(DOsqrt~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DOsqrt~Site, data=PR_VP2) # significant
+
+# Cube
+fit2 <-lm(DOcube~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DOcube~Site, data=PR_VP2) # significant
+```
+
+```{r}
+## TA
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(TA~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(TA~Site, data=PR_VP2) # not significant
+
+# Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(TAlog~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significiant
+kruskal.test(TAlog~Site, data=PR_VP2) # not significant
+
+# Sqrt
+fit2 <-lm(TAsqrt~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(TAsqrt~Site, data=PR_VP2) # not significant
+
+# Cube
+fit2 <-lm(TAcube~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant 
+kruskal.test(TAcube~Site, data=PR_VP2) # not significant
+```
+
+```{r}
+# pCO2
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(pCO2~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(pCO2~Site, data=PR_VP2) # significant
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(pCO2log~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(pCO2log~Site, data=PR_VP2) # significant
+
+# Cube
+fit2 <-lm(pCO2cube~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(pCO2cube~Site, data=PR_VP2) # significant
+
+# Reciprocal
+fit2 <-lm(pCO2recp~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant 
+kruskal.test(pCO2recp~Site, data=PR_VP2) # significant
+```
+
+```{r}
+##Omega Ca
+##First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Omega_Ca~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(Omega_Ca~Site, data=PR_VP2) # significant
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(Calog~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Calog~Site, data=PR_VP2) # not significant
+
+# Sqrt
+fit2 <-lm(Casqrt~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Casqrt~Site, data=PR_VP2) # significant
+
+# Cube
+fit2 <-lm(Cacube~Site, na.action = na.exclude, data=PR_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Cacube~Site, data=PR_VP2) # not significant
+```
+
+
+
+#### Comparing UC and VP-2
+```{r}
+# Bind sites together in df 
+UC_VP2 <- rbind(UC,VP_2)
+UC_VP2$Site <- as.factor(UC_VP2$Site)
+```
+
+## Compare field water quality by UC and VP-2 sites
+
+```{r}
+## Temperature 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Temperature~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(Temperature~Site, data=UC_VP2) # significant
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Sqrt
+fit2 <-lm(t_sqrt~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(t_sqrt~Site, data=UC_VP2) # significant
+
+# Cube
+fit2 <-lm(t_cube~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(t_cube~Site, data=UC_VP2) # significant
+```
+
+```{r}
+## Salinity 
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Salinity~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(Salinity~Site, data=UC_VP2) # significant 
+
+# Second, I will do the ANOVA test using the transformed variables (log, sqrt, cube) to compare/check them to the untransformed 
+# Log
+fit2 <-lm(Slog~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(Slog~Site, data=UC_VP2) # significant
+
+# Sqrt
+fit2 <-lm(Ssqrt~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(Ssqrt~Site, data=UC_VP2) # significant
+
+# Cube
+fit2 <-lm(Scube~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(Scube~Site, data=UC_VP2) # significant
+```
+
+```{r}
+## spec pH
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(specpH~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(specpH~Site, data=UC_VP2) # not significant
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(pHlog~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant 
+kruskal.test(pHlog~Site, data=UC_VP2) # not significant
+
+# Sqrt
+fit2 <-lm(pHsqrt~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(pHsqrt~Site, data=UC_VP2) # not significant
+
+# Cube
+fit2 <-lm(pHcube~Site, na.action = na.exclude, data=UC_VP2) 
+summary(fit2) 
+Anova(fit2, type="III") # not significant 
+kruskal.test(pHcube~Site, data=UC_VP2) # not significant
+```
+
+```{r}
+## DO mg
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(DO_mg~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DO_mg~Site, data=UC_VP2) # significant
+
+# Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(DOlog~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DOlog~Site, data=UC_VP2) # significant
+
+# Log
+fit2 <-lm(DOsqrt~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DOsqrt~Site, data=UC_VP2) # significant
+
+# Cube
+fit2 <-lm(DOcube~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DOcube~Site, data=UC_VP2) # significant
+```
+
+```{r}
+## TA
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(TA~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(TA~Site, data=UC_VP2) # not significant
+
+# Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(TAlog~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significiant
+kruskal.test(TAlog~Site, data=UC_VP2) # not significant
+
+# Sqrt
+fit2 <-lm(TAsqrt~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(TAsqrt~Site, data=UC_VP2) # not significant
+
+# Cube
+fit2 <-lm(TAcube~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant 
+kruskal.test(TAcube~Site, data=UC_VP2) # not significant
+```
+
+```{r}
+# pCO2
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(pCO2~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(pCO2~Site, data=UC_VP2) # significant
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(pCO2log~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(pCO2log~Site, data=UC_VP2) # significant
+
+# Cube
+fit2 <-lm(pCO2cube~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(pCO2cube~Site, data=UC_VP2) # significant
+
+# Reciprocal
+fit2 <-lm(pCO2recp~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # slightly significant 
+kruskal.test(pCO2recp~Site, data=UC_VP2) # significant
+```
+
+```{r}
+##Omega Ca
+##First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Omega_Ca~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Omega_Ca~Site, data=UC_VP2) # not significant
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(Calog~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Calog~Site, data=UC_VP2) # not significant
+
+# Sqrt
+fit2 <-lm(Casqrt~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Casqrt~Site, data=UC_VP2) # not significant
+
+# Cube
+fit2 <-lm(Cacube~Site, na.action = na.exclude, data=UC_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Cacube~Site, data=UC_VP2) # not significant
+```
+
+
+#### Comparing VP and VP-2
+```{r}
+# Bind sites together in df 
+VP_VP2 <- rbind(VP,VP_2)
+VP_VP2$Site <- as.factor(VP_VP2$Site)
+```
+
+## Compare field water quality by VP and VP-2 sites
+```{r}
+## Temperature 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Temperature~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(Temperature~Site, data=VP_VP2) # significant
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Sqrt
+fit2 <-lm(t_sqrt~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(t_sqrt~Site, data=VP_VP2) # significant
+
+# Cube
+fit2 <-lm(t_cube~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(t_cube~Site, data=VP_VP2) # significant
+```
+
+```{r}
+## Salinity 
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Salinity~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(Salinity~Site, data=VP_VP2) # significant 
+
+# Second, I will do the ANOVA test using the transformed variables (log, sqrt, cube) to compare/check them to the untransformed 
+# Log
+fit2 <-lm(Slog~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(Slog~Site, data=VP_VP2) # significant
+
+# Sqrt
+fit2 <-lm(Ssqrt~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2) 
+Anova(fit2, type="III") # significant
+kruskal.test(Ssqrt~Site, data=VP_VP2) # significant
+
+# Cube
+fit2 <-lm(Scube~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(Scube~Site, data=VP_VP2) # significant
+```
+
+```{r}
+## spec pH
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(specpH~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(specpH~Site, data=VP_VP2) # not significant
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(pHlog~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant 
+kruskal.test(pHlog~Site, data=VP_VP2) # not significant
+
+# Sqrt
+fit2 <-lm(pHsqrt~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(pHsqrt~Site, data=VP_VP2) # not significant
+
+# Cube
+fit2 <-lm(pHcube~Site, na.action = na.exclude, data=VP_VP2) 
+summary(fit2) 
+Anova(fit2, type="III") # not significant 
+kruskal.test(pHcube~Site, data=VP_VP2) # not significant
+```
+
+```{r}
+## DO mg
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(DO_mg~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DO_mg~Site, data=VP_VP2) # significant
+
+# Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(DOlog~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DOlog~Site, data=VP_VP2) # significant
+
+# Log
+fit2 <-lm(DOsqrt~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DOsqrt~Site, data=VP_VP2) # significant
+
+# Cube
+fit2 <-lm(DOcube~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(DOcube~Site, data=VP_VP2) # significant
+```
+
+```{r}
+## TA
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(TA~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(TA~Site, data=VP_VP2) # not significant
+
+# Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(TAlog~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significiant
+kruskal.test(TAlog~Site, data=VP_VP2) # not significant
+
+# Sqrt
+fit2 <-lm(TAsqrt~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(TAsqrt~Site, data=VP_VP2) # not significant
+
+# Cube
+fit2 <-lm(TAcube~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant 
+kruskal.test(TAcube~Site, data=VP_VP2) # not significant
+```
+
+```{r}
+# pCO2
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(pCO2~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(pCO2~Site, data=VP_VP2) # significant
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(pCO2log~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(pCO2log~Site, data=VP_VP2) # significant
+
+# Cube
+fit2 <-lm(pCO2cube~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(pCO2cube~Site, data=VP_VP2) # significant
+
+# Reciprocal
+fit2 <-lm(pCO2recp~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # slightly significant 
+kruskal.test(pCO2recp~Site, data=VP_VP2) # significant
+```
+
+```{r}
+##Omega Ca
+##First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Omega_Ca~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Omega_Ca~Site, data=VP_VP2) # not significant
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Log
+fit2 <-lm(Calog~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Calog~Site, data=VP_VP2) # not significant
+
+# Sqrt
+fit2 <-lm(Casqrt~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Casqrt~Site, data=VP_VP2) # not significant
+
+# Cube
+fit2 <-lm(Cacube~Site, na.action = na.exclude, data=VP_VP2)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Cacube~Site, data=VP_VP2) # not significant
+```
+
+
+
+
+# Plot water quality variables 
+```{r}
+# Format data 
+field_WQ$Date <- parse_date(field_WQ$Date, "%m/%d/%y")
+```
+
+```{r}
+## Plot WQ variables 
+Temps <- ggplot(field_WQ, aes(x=Date, y=Temperature)) +
+  geom_line(aes(color = Site), size = 1)+
+  scale_color_manual(values = c("mediumpurple3", "darkorange2", "palegreen3", "dodgerblue2", "goldenrod2")) +
+  ylab("Temperature (°C)") +
+  theme_linedraw()
+Temps
+
+Sal <- ggplot(field_WQ, aes(x=Date, y=Salinity)) +
+  geom_line(aes(color = Site), size = 1)+
+  scale_color_manual(values = c("mediumpurple3", "darkorange2", "palegreen3", "dodgerblue2", "goldenrod2")) +
+  ylab("Salinity (psu)") +
+  theme_linedraw()
+Sal
+
+pH <- ggplot(field_WQ, aes(x=Date, y=specpH)) +
+  geom_line(aes(color = Site), size = 1)+
+  scale_color_manual(values = c("mediumpurple3", "darkorange2", "palegreen3", "dodgerblue2", "goldenrod2")) +
+  ylab("pH Total") +
+  theme_linedraw()
+pH
+
+DO <- ggplot(field_WQ, aes(x=Date, y=DO_mg)) +
+  geom_line(aes(color = Site), size = 1)+
+  scale_color_manual(values = c("mediumpurple3", "darkorange2", "palegreen3", "dodgerblue2", "goldenrod2")) +
+  ylab("Dissolved oxygen (mg/mL)") + 
+  theme_linedraw()
+DO
+
+TA <- ggplot(field_WQ, aes(x=Date, y=TA)) +
+  geom_line(aes(color = Site), size = 1)+
+  scale_color_manual(values = c("mediumpurple3", "darkorange2", "palegreen3", "dodgerblue2", "goldenrod2")) +
+  ylab("Total alkalinity (μmol/kg)") +
+  theme_linedraw()
+TA
+
+pCO2 <- ggplot(field_WQ, aes(x=Date, y=pCO2)) +
+  geom_line(aes(color = Site), size = 1)+
+  scale_color_manual(values = c("mediumpurple3", "darkorange2", "palegreen3", "dodgerblue2", "goldenrod2")) +
+  ylab("pCO2 (μatm)") +
+  theme_linedraw()
+pCO2
+
+Ca <- ggplot(field_WQ, aes(x=Date, y=Omega_Ca)) +
+  geom_line(aes(color = Site), size = 1)+
+  scale_color_manual(values = c("mediumpurple3", "darkorange2", "palegreen3", "dodgerblue2", "goldenrod2")) +
+  ylab("Ω Calcite") +
+  theme_linedraw()
+Ca
+
+```
+
+```{r}
+# Save plots
+# as pdfs
+ggsave("output/SuppFigures/FigureS2.pdf", plot = Temps, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS3.pdf", plot = Sal, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS4.pdf", plot = pH, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS5.pdf", plot = DO, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS6.pdf", plot = TA, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS7.pdf", plot = pCO2, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS8.pdf", plot = Ca, width = 8, height = 4)
+
+# as pngs
+ggsave("output/SuppFigures/FigureS2.png", plot = Temps, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS3.png", plot = Sal, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS4.png", plot = pH, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS5.png", plot = DO, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS6.png", plot = TA, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS7.png", plot = pCO2, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS8.png", plot = Ca, width = 8, height = 4)
+```
+
+
