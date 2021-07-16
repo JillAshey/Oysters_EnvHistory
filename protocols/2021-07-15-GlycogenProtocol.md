@@ -7,9 +7,7 @@ projects: Oyster Environmental History
 
 ### Glycogen Protocol
 
-
 This protocol is adapted from [Guevelou and Allen 2016](https://www.sciencedirect.com/science/article/abs/pii/S0044848616301338). 
-
 
 #### Materials and Equipment 
 - [15 mL falcon tubes](https://www.fishersci.com/shop/products/falcon-15ml-conical-centrifuge-tubes-5/p-193301)
@@ -62,7 +60,7 @@ Remove cap from falcon tube, cover top of tube with aluminum foil, and poke smal
 
 ##### 7) Measure glycogen using 96 well plate and plate reader. 
 
-- Using a 96-well plate, add 20µL of sample or standard to each well. 
+- Using a 96-well plate, add 20µL of sample or standard to each well. Run each sample in triplicate.
 - Using a multi-channel pipette, add 130µL of KI2CaCl2 to each well. Pipette up and down to mix reagent solution and samples/standard. 
 - Once all wells are filled, cover plate and incubate in a drawer at room temperature for 30 minutes. 
 - Place plate on plate reader, shake plate laterally for 60 seconds, and measure absorbance at 450nm. 

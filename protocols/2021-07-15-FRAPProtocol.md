@@ -65,7 +65,7 @@ Did I do this step?
 
 ##### 11) Measure FRAP using 96 well plate and plate reader. 
 
-- After the blank measurement, remove the plate from the plate reader and add 20uL of sample/standard to each well. Pipette up and down to mix working reagent solution and samples/standard. 
+- After the blank measurement, remove the plate from the plate reader and add 20uL of sample/standard to each well. Pipette up and down to mix working reagent solution and samples/standard. Run each sample in triplicate.
 - Incubate plate in plate reader at 37C for 4-8 minutes. 
 - Measure absorbance again at 600nm. 
 

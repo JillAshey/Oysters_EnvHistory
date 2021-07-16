@@ -19,14 +19,10 @@ This protocol is from the ThermoScientific Pierce BCA Protein Assay Kit. User gu
 
 #### Protocol Steps 
 
-##### 1) Prepare samples - come from gill tissue
+##### 1) Prepare samples
 
-
-
-
--  Weigh out 10-20mg of dried, homogenized tissue and put it in a pre-labeled, pre-weighed 15 mL falcon tube. To obtain dried tissue, follow steps 1-3 in [Glycogen Protocol](https://github.com/JillAshey/Oysters_EnvHistory/blob/main/protocols/2021-07-15-GlycogenProtocol.md).
--  Add xx mL of ultrapure water to the falcon tube (if this is too concentrated during measurements, dilute further). 
--  Using a sonicator, further homogenize the tissue until it becomes a tissue slurry. 
+- Use the 15-20 uL aliquot taken from the FRAP assay (see [here](https://github.com/JillAshey/Oysters_EnvHistory/blob/main/protocols/2021-07-15-FRAPProtocol.md), Step 5) for protein BCA assay. 
+- The aliquot should already be homogenized. If the aliquot is too concentrated during measurements, dilute further with ultrapure water. 
 
 ##### 2) Prepare standards 
 
@@ -57,7 +53,7 @@ I |	400 | 0 | 0
 
 ##### 4) Measure protein content using 96 well plate and plate reader. 
 
-- Using a 96-well plate, add 25µL of sample or standard to each well. 
+- Using a 96-well plate, add 25µL of sample or standard to each well. Run each sample in triplicate.
 - Using a multi-channel pipette, add 200µL of working reagent to each well. Pipette up and down to mix working reagent solution and samples/standard. 
 - Once all wells are filled, shake plate laterally on plate reader for 30 seconds. 
 - Cover plate and incubate at 37C for 30 minutes. 
