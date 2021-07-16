@@ -24,6 +24,8 @@ projects: Oyster Environmental History
 - Connect airline tubing to air inputs and cut the tubing so that there is one airline tube for each plastic container. 
 - Put an airstone at the end of the airline tubes
 
+![](https://github.com/JillAshey/Oysters_EnvHistory/blob/main/images/AcuteExposureSetup.png?raw=true)
+
 ##### 2) Make treatment water
 
 - Determine the salinities to be used in the exposure. 
