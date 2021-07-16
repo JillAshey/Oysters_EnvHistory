@@ -10,12 +10,12 @@ projects: Oyster Environmental History
 This protocol is from the ThermoScientific Pierce BCA Protein Assay Kit. User guide is [here](https://www.thermofisher.com/document-connect/document-connect.html?url=https%3A%2F%2Fassets.thermofisher.com%2FTFS-Assets%2FLSG%2Fmanuals%2FMAN0011430_Pierce_BCA_Protein_Asy_UG.pdf&title=VXNlciBHdWlkZTogUGllcmNlIEJDQSBQcm90ZWluIEFzc2F5IEtpdA==). 
 
 #### Materials and Equipment 
-- 15 mL falcon tubes
+- [15 mL falcon tubes](https://www.fishersci.com/shop/products/falcon-15ml-conical-centrifuge-tubes-5/p-193301)
 - [Pierce BCA Protein Assay Kit](https://www.thermofisher.com/order/catalog/product/23225#/23225)
-- Plate reader
+- [Plate reader](https://www.moleculardevices.com/products/microplate-readers/multi-mode-readers/spectramax-id3-id5-readers#gref)
 - Sonicator
 - Ethanol
-- 96 well flat-bottom plate
+- [96 well flat-bottom plate](https://ecatalog.corning.com/life-sciences/b2c/US/en/Microplates/Assay-Microplates/96-Well-Microplates/Corning®-96-well-Clear-Polystyrene-Microplates/p/3370)
 
 #### Protocol Steps 
 

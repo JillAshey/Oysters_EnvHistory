@@ -10,12 +10,12 @@ projects: Oyster Environmental History
 This protocol is adapted from [Griffin and Bhagooli 2004](https://www.sciencedirect.com/science/article/pii/S002209810300515X?casa_token=AfLDqurMV9MAAAAA:5JBuNauuMbQJfZTkLZ1HtAsWqqoEBSTz4sp9jG4jPf1bkw_jq65WZ_2NbFe_JlgK44rVrPF2mg). 
 
 #### Materials and Equipment 
-- 1 mL microcentrifuge tubes
-- 50 mL falcon tubes
+- [1 mL microcentrifuge tubes](https://www.thomassci.com/scientific-supplies/1-Ml-Microcentrifuge-Tube)
+- [50 mL falcon tubes](https://www.fishersci.com/shop/products/falcon-50ml-conical-centrifuge-tubes-2/p-193321)
 - Centrifuge
-- Plate reader
+- [Plate reader](https://www.moleculardevices.com/products/microplate-readers/multi-mode-readers/spectramax-id3-id5-readers#gref)
 - Sonicator
-- 96 well flat-bottom plate
+- [96 well flat-bottom plate](https://ecatalog.corning.com/life-sciences/b2c/US/en/Microplates/Assay-Microplates/96-Well-Microplates/Corning®-96-well-Clear-Polystyrene-Microplates/p/3370)
 
 #### Protocol Steps 
 

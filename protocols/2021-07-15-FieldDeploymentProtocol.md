@@ -7,15 +7,16 @@ projects: Oyster Environmental History
 
 #### Materials and Equipment 
 - Mesh bags 
-- Zip ties
-- Milk crates 
+- [Zip ties](https://www.amazon.com/White-Strength-Nylon-Bolt-Dropper/dp/B06X1CKSD2)
+- [Milk crates](https://www.homedepot.com/p/Edsal-11-in-x-13-in-x-13-in-16-Qt-Polypropylene-Milk-Crate-Storage-Box-in-Black-MK131311-HD/300656648)
 - Rope
-- YSI ProPlus
-- Acid-washed borosilicate glass bottles
+- [YSI ProPlus](https://www.ysi.com/proplus)
+- [Acid-washed borosilicate glass bottles](https://www.thomassci.com/Laboratory-Supplies/Solution-Bottles/_/PYREXPLUS-SOLUTION-BOTTLES?q=Borosilicate%20Bottles)
 - Saturated mercuric chloride
 - Pipette and tips 
-- Plastic 1L Nalgene bottles 
-- Small glass vials
+- [Plastic 1L Nalgene bottles](https://www.usplastic.com/catalog/item.aspx?itemid=29387&gclid=Cj0KCQjwub-HBhCyARIsAPctr7x6i2Id-Jw8XSLLGoLscOQssDnmKL-kpEmmdtQ0E2_ouEktoesGWmoaAvxdEALw_wcB)
+- [Small glass vials](https://www.premiumvials.com/1-dram-clear-glass-vial-w-cap-pkg-of-144/?gclid=Cj0KCQjwub-HBhCyARIsAPctr7y0Gp2NJ_ssPHDsE6-FvmkPJF64tA2cFtGx-ERRvJ9P6WP-BVnpRq4aAtbKEALw_wcB)
+- [Pipette bulbs](https://www.fishersci.com/shop/products/fisherbrand-silicone-bulb-type-safety-pipet-fillers-3/p-46831)
 
 #### Protocol Steps 
 
@@ -41,15 +42,7 @@ The oysters should have enough room to feed in the mesh bags.
 - Record measurements when values stabilize on YSI. 
 - Remove probes from cage and put back in storage solution. Water in Nalgene can be discarded. 
 
-##### 6) Collect water for pH spectrometry. 
-
-*These next steps only pertain to the VIMS Pier site. Because we have immediate access to a spectrophotometer, the pH of the water can be measured without having to poison it with mercuric chlroide.*
-
-- Refill a plastic Nalgene bottle with new seawater 
-- Fill 3 small glass vials with water. Rinse 3x before filling. Fill the vials until they are completely full and cap them. Make sure there are no air bubbles!!
-- Within one hour of collection, measure the pH of the samples using the spectrophotmoeter. More on using the spectrophotometer here. 
-
-##### 7) Collect water for total alkalinity measurements. 
+##### 6) Collect water for total alkalinity measurements. 
 
 *VIMS only*
 
@@ -61,6 +54,26 @@ The oysters should have enough room to feed in the mesh bags.
 - Fill acid-washed borosilicate glass bottles with seawater. Rinse 3x before filling. Do not fill the entire bottle, leave a little space at the top. 
 - Add xx mL of mercuric chloride to the bottle. This will stop all biological activity and preserve the water chemistry. 
 - Coat the part of stopper that goes into bottle with oil (??). Put stopper in the bottle and parafilm the top. 
+- Water from these bottles will also be used for pH spectrometry. 
+- Store bottles at 4C for later total alkalinity and pH analysis.
+
+##### 7) Collect water for pH spectrometry. 
+
+More on using the spectrophotometer here. 
+
+*VIMS only*
+
+Because we have immediate access to a spectrophotometer at VIMS, the pH of the water can be measured without having to poison it with mercuric chlroide.
+
+- Refill a plastic Nalgene bottle with new seawater 
+- Fill 3 small glass vials with water. Rinse 3x before filling. Fill the vials until they have a positive meniscus and cap them. Make sure there are no air bubbles!!
+- Within one hour of collection, measure the pH of the samples using the spectrophotmoeter. 
+
+*Remote sites*
+
+- In the lab (does not have to be same day as collection), use Pauster pipetter and pipette bulbs to draw up poisoned seawater from the glass bottles. 
+- Fill 3 small glass vials with water. Rinse 3x before filling. Fill the vials until they have a positive meniscus and cap them. Make sure there are no air bubbles!!
+- Store bottles at 4C for later pH analysis.
 
 #### Monitoring after initial deployment
 

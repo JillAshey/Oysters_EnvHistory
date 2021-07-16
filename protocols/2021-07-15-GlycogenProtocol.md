@@ -12,10 +12,10 @@ This protocol is adapted from [Guevelou and Allen 2016](https://www.sciencedirec
 
 
 #### Materials and Equipment 
-- 15 mL falcon tubes
+- [15 mL falcon tubes](https://www.fishersci.com/shop/products/falcon-15ml-conical-centrifuge-tubes-5/p-193301)
 - Freeze dryer
 - Centrifuge
-- Plate reader
+- [Plate reader](https://www.moleculardevices.com/products/microplate-readers/multi-mode-readers/spectramax-id3-id5-readers#gref)
 - Mortar and pestel 
 - 15% trichloroacetic acid: Sigma T6399-100g
 - Potassium iodine (KI): Sigma 746428-100G
@@ -23,7 +23,7 @@ This protocol is adapted from [Guevelou and Allen 2016](https://www.sciencedirec
 - Calcium chloride dihydrate (CaCl2) 
 - Pure glycogen from oyster: Sigma G8751-5g
 - Ethanol
-- 96 well flat-bottom plate
+- [96 well flat-bottom plate](https://ecatalog.corning.com/life-sciences/b2c/US/en/Microplates/Assay-Microplates/96-Well-Microplates/Corning®-96-well-Clear-Polystyrene-Microplates/p/3370)
 
 #### Protocol Steps 
 
