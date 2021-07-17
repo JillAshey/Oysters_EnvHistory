@@ -1,0 +1,1106 @@
+---
+title: "Physiology"
+author: "jillashey"
+date: "7/16/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load libraries
+library(car)
+library(rcompanion)
+library(gdata)
+library(multcomp)
+library(nlme)
+library(MASS)
+library(lme4)
+library(FSA)
+library(tidyverse)
+library(devtools)
+library(gridExtra)
+library(plotrix)
+```
+
+# Read in data 
+```{r}
+phys <- read.csv("data/Glycogen_CI/HT_CIGly.csv", header = T)
+head(phys)
+phys$Site <- as.factor(phys$Site)
+set1 <- filter(phys, Set  == "Set1")
+set2 <- filter(phys, Set  == "Set2")
+```
+# Set1
+# Evaluate normality for all variables 
+
+Evaluate normality using histograms, Levene's test, Bartlett test, and QQplots.
+- Levene's test: more robust to departures from normality than Bartlett's test; p>0.05 means the variances are equal
+- Bartlett test: If the data is normally distributed, this is the best test to use. It is more likely to return a "false positive" when the data is non-normal; p>0.05 means the variances are equal
+- Q-Q plot: tests the hypothesis that the data is normally distributed.  If the points on the plot are reasonably well approximated by a straight line, the popular Gaussian data hypothesis is plausible, while marked deviations from linearity provide evidence against this hypothesis and these data points should be removed.  
+
+```{r}
+## Glycogen
+# Evaluate normality
+hist(set1$P_Glycogen_DW)
+plotNormalHistogram(set1$P_Glycogen_DW)
+leveneTest(P_Glycogen_DW~Site, data=set1) #normal
+bartlett.test(P_Glycogen_DW~Site, data=set1) #normal 
+fit<-lm(P_Glycogen_DW~Site, data=set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+# Glycogen log and sqrt were previously calculated in phys df
+g_cube1= sign(set1$P_Glycogen_DW) * abs(set1$P_Glycogen_DW)^(1/3)
+plotNormalHistogram(g_cube1) 
+g_recp1 = 1/(set1$P_Glycogen_DW)
+plotNormalHistogram(g_recp1)
+# Based on initial histograms, cube looks sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+set1 = cbind(set1, g_cube1)
+
+# Evaluate normality in log transformed glycogen 
+leveneTest(Log_Gly~Site, data=set1) #normal
+bartlett.test(Log_Gly~Site, data=set1) #normal 
+fit<-lm(Log_Gly~Site, data=set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in sqrt transformed glycogen 
+leveneTest(Sqrt_Gly~Site, data=set1) #normal
+bartlett.test(Sqrt_Gly~Site, data=set1) #normal 
+fit<-lm(Sqrt_Gly~Site, data=set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in cube transformed glycogen 
+leveneTest(g_cube1~Site, data=set1) #normal
+bartlett.test(g_cube1~Site, data=set1) #normal 
+fit<-lm(g_cube1~Site, data=set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+## Not enough justification to transform - NO TRANSFORM in glycogen set1
+```
+
+```{r}
+## Condition Index
+# Evaluate normality
+hist(set1$ConditionIndex)
+plotNormalHistogram(set1$ConditionIndex)
+leveneTest(ConditionIndex~Site, data=set1) #normal
+bartlett.test(ConditionIndex~Site, data=set1) #normal 
+fit<-lm(ConditionIndex~Site, data=set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+# CI log and sqrt were previously calculated in phys df
+CI_cube1= sign(set1$ConditionIndex) * abs(set1$ConditionIndex)^(1/3)
+plotNormalHistogram(CI_cube1) 
+CI_recp1 = 1/(set1$ConditionIndex)
+plotNormalHistogram(CI_recp1)
+# Based on initial histograms, cube looks sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+set1 = cbind(set1, CI_cube1)
+
+# Evaluate normality in log transformed CI 
+leveneTest(Log_CI~Site, data=set1) #normal
+bartlett.test(Log_CI~Site, data=set1) #normal 
+fit<-lm(Log_CI~Site, data=set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in sqrt transformed CI 
+leveneTest(Sqrt_CI~Site, data=set1) #normal
+bartlett.test(Sqrt_CI~Site, data=set1) #normal 
+fit<-lm(Sqrt_CI~Site, data=set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in cube transformed CI 
+leveneTest(CI_cub1e~Site, data=set1) #normal
+bartlett.test(CI_cube1~Site, data=set1) #normal 
+fit<-lm(CI_cube1~Site, data=set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+```
+
+
+
+
+
+
+
+
+# Set2
+# Evaluate normality for all variables 
+```{r}
+## Glycogen
+# Evaluate normality
+hist(set2$P_Glycogen_DW)
+plotNormalHistogram(set2$P_Glycogen_DW)
+leveneTest(P_Glycogen_DW~Site, data=set2) #normal
+bartlett.test(P_Glycogen_DW~Site, data=set2) #normal 
+fit<-lm(P_Glycogen_DW~Site, data=set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+# Glycogen log and sqrt were previously calculated in phys df
+g_cube2= sign(set2$P_Glycogen_DW) * abs(set2$P_Glycogen_DW)^(1/3)
+plotNormalHistogram(g_cube2) 
+g_recp2 = 1/(set2$P_Glycogen_DW)
+plotNormalHistogram(g_recp2)
+# Based on initial histograms, cube and recp looks sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+set2 = cbind(set2, g_cube2, g_recp2)
+
+# Evaluate normality in log transformed glycogen 
+leveneTest(Log_Gly~Site, data=set2) #normal
+bartlett.test(Log_Gly~Site, data=set2) # not normal 
+fit<-lm(Log_Gly~Site, data=set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in sqrt transformed glycogen 
+leveneTest(Sqrt_Gly~Site, data=set2) #normal
+bartlett.test(Sqrt_Gly~Site, data=set2) # not normal 
+fit<-lm(Sqrt_Gly~Site, data=set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in cube transformed glycogen 
+leveneTest(g_cube2~Site, data=set2) #normal
+bartlett.test(g_cube2~Site, data=set2) #not normal 
+fit<-lm(g_cube2~Site, data=set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in recp transformed glycogen 
+leveneTest(g_recp2~Site, data=set2) # not normal
+bartlett.test(g_recp2~Site, data=set2) #not normal 
+fit<-lm(g_recp2~Site, data=set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+```
+
+```{r}
+## Delta Glycogen
+# Evaluate normality
+hist(set2$P_DeltaGly_DW)
+plotNormalHistogram(set2$P_DeltaGly_DW)
+leveneTest(P_DeltaGly_DW~Site, data=set2) #normal
+bartlett.test(P_DeltaGly_DW~Site, data=set2) # not normal 
+fit<-lm(P_DeltaGly_DW~Site, data=set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+# Glycogen log and sqrt were previously calculated in phys df
+g_cube_delta= sign(set2$P_DeltaGly_DW) * abs(set2$P_DeltaGly_DW)^(1/3)
+plotNormalHistogram(g_cube_delta) 
+g_recp_delta = 1/(set2$P_DeltaGly_DW)
+plotNormalHistogram(g_recp_delta)
+# Based on initial histograms, cube and recp looks sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+set2 = cbind(set2, g_cube_delta, g_recp_delta)
+
+# Evaluate normality in log transformed glycogen 
+leveneTest(Log_Delta_Gly~Site, data=set2) #normal
+bartlett.test(Log_Delta_Gly~Site, data=set2) # not normal 
+fit<-lm(Log_Delta_Gly~Site, data=set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in sqrt transformed glycogen 
+leveneTest(Sqrt_Delta_Gly~Site, data=set2) #normal
+bartlett.test(Sqrt_Delta_Gly~Site, data=set2) # not normal 
+fit<-lm(Sqrt_Delta_Gly~Site, data=set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in cube transformed glycogen 
+leveneTest(g_cube_delta~Site, data=set2) #normal
+bartlett.test(g_cube_delta~Site, data=set2) # normal 
+fit<-lm(g_cube_delta~Site, data=set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in recp transformed glycogen 
+leveneTest(g_recp_delta~Site, data=set2) # not normal
+bartlett.test(g_recp_delta~Site, data=set2) #not normal 
+fit<-lm(g_recp_delta~Site, data=set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+```
+
+```{r}
+## Condition Index
+# Evaluate normality
+hist(set2$ConditionIndex)
+plotNormalHistogram(set2$ConditionIndex)
+leveneTest(ConditionIndex~Site, data=set2) #normal
+bartlett.test(ConditionIndex~Site, data=set2) #normal 
+fit<-lm(ConditionIndex~Site, data=set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+# CI log and sqrt were previously calculated in phys df
+CI_cube2 = sign(set2$ConditionIndex) * abs(set2$ConditionIndex)^(1/3)
+plotNormalHistogram(CI_cube2) 
+CI_recp2 = 1/(set2$ConditionIndex)
+plotNormalHistogram(CI_recp2)
+# Based on initial histograms, cube looks sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+set2 = cbind(set2, CI_cube2, CI_recp2)
+
+# Evaluate normality in log transformed CI 
+leveneTest(Log_CI~Site, data=set2) #normal
+bartlett.test(Log_CI~Site, data=set2) #normal 
+fit<-lm(Log_CI~Site, data=set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in sqrt transformed CI 
+leveneTest(Sqrt_CI~Site, data=set2) #normal
+bartlett.test(Sqrt_CI~Site, data=set2) #normal 
+fit<-lm(Sqrt_CI~Site, data=set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in cube transformed CI 
+leveneTest(CI_cube2~Site, data=set2) #normal
+bartlett.test(CI_cube2~Site, data=set2) #normal 
+fit<-lm(CI_cube2~Site, data=set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in recp transformed CI 
+leveneTest(CI_recp2~Site, data=set2) #normal
+bartlett.test(CI_recp2~Site, data=set2) #normal 
+fit<-lm(CI_recp2~Site, data=set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+```
+
+```{r}
+## Delta Condition Index
+# Evaluate normality
+hist(set2$Delta_CI)
+plotNormalHistogram(set2$Delta_CI)
+leveneTest(Delta_CI~Site, data=set2) #normal
+bartlett.test(Delta_CI~Site, data=set2) #normal 
+fit<-lm(Delta_CI~Site, data=set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+# CI log and sqrt were previously calculated in phys df
+CI_cube_delta = sign(set2$Delta_CI) * abs(set2$Delta_CI)^(1/3)
+plotNormalHistogram(CI_cube_delta) 
+CI_recp_delta = 1/(set2$Delta_CI)
+plotNormalHistogram(CI_recp_delta)
+# Based on initial histograms, recp looks sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+set2 = cbind(set2, CI_recp_delta)
+
+# Evaluate normality in log transformed CI 
+leveneTest(Log_CI~Site, data=set2) #normal
+bartlett.test(Log_CI~Site, data=set2) #normal 
+fit<-lm(Log_CI~Site, data=set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in sqrt transformed CI 
+leveneTest(Sqrt_CI~Site, data=set2) #normal
+bartlett.test(Sqrt_CI~Site, data=set2) #normal 
+fit<-lm(Sqrt_CI~Site, data=set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in recp transformed CI 
+leveneTest(CI_recp_delta~Site, data=set2) #not normal
+bartlett.test(CI_recp2~Site, data=set2) #normal 
+fit<-lm(CI_recp2~Site, data=set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+```
+
+
+# Run one-way ANOVAs to identify differences by site 
+#### Comparing sites: MR, PR, UC, VP for Set1
+
+```{r}
+## Glycogen 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(P_Glycogen_DW~Site, na.action = na.exclude, data=set1)
+summary(fit2) # none significant
+Anova(fit2, type="III") # not significant
+kruskal.test(P_Glycogen_DW~Site, data=set1) # not significant
+
+# Second, I will do the ANOVA test using the transformed (log, sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(Log_Gly~Site, na.action = na.exclude, data=set1)
+summary(fit2) # none significant
+Anova(fit2, type="III") # not significant
+kruskal.test(Log_Gly~Site, data=set1) # not significant
+
+# Sqrt
+fit2 <-lm(Sqrt_Gly~Site, na.action = na.exclude, data=set1)
+summary(fit2) # none significant
+Anova(fit2, type="III") # not significant
+kruskal.test(Sqrt_Gly~Site, data=set1) # not significant
+
+# Cube
+fit2 <-lm(g_cube1~Site, na.action = na.exclude, data=set1)
+summary(fit2) # none significant
+Anova(fit2, type="III") # not significant
+kruskal.test(g_cube1~Site, data=set1) # not significant
+```
+
+```{r}
+## Condition index 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(ConditionIndex~Site, na.action = na.exclude, data=set1)
+summary(fit2) # significant
+Anova(fit2, type="III") # significant
+test_CI <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_CI) # significant comparisons by site
+kruskal.test(ConditionIndex~Site, data=set1) # significant
+dunnTest(ConditionIndex~Site, data=set1) # Automatically fills in Holm method; significant comparisons by site
+
+# Second, I will do the ANOVA test using the transformed (log, sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(Log_CI~Site, na.action = na.exclude, data=set1)
+summary(fit2) # significant
+Anova(fit2, type="III") # significant
+test_CI <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_CI) # significant comparisons by site
+kruskal.test(Log_CI~Site, data=set1) # not significant
+dunnTest(Log_CI~Site, data=set1) # Automatically fills in Holm method; significant comparisons by site
+
+# Sqrt
+fit2 <-lm(Sqrt_CI~Site, na.action = na.exclude, data=set1)
+summary(fit2) # significant
+Anova(fit2, type="III") # significant
+test_CI <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_CI) # significant comparisons by site
+kruskal.test(Sqrt_CI~Site, data=set1) # significant
+dunnTest(Sqrt_CI~Site, data=set1) # Automatically fills in Holm method; significant comparisons by site
+
+# Cube
+fit2 <-lm(CI_cube1~Site, na.action = na.exclude, data=set1)
+summary(fit2) # significant
+Anova(fit2, type="III") # significant
+test_CI <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_CI) # significant comparisons by site
+kruskal.test(CI_cube1~Site, data=set1) # significant
+dunnTest(CI_cube1~Site, data=set1) # Automatically fills in Holm method; significant comparisons by site
+```
+
+
+#### Comparing sites: MR, PR, UC, VP for Set2
+
+```{r}
+## Glycogen 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(P_Glycogen_DW~Site, na.action = na.exclude, data=set2)
+summary(fit2) # none significant
+Anova(fit2, type="III") # not significant
+kruskal.test(P_Glycogen_DW~Site, data=set2) # significant
+dunnTest(P_Glycogen_DW~Site, data=set2) # Automatically fills in Holm method; significant comparisons by site
+
+# Second, I will do the ANOVA test using the transformed (log, sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(Log_Gly~Site, na.action = na.exclude, data=set2)
+summary(fit2) # none significant
+Anova(fit2, type="III") # not significant
+kruskal.test(Log_Gly~Site, data=set2) # significant
+dunnTest(Log_Gly~Site, data=set2) # Automatically fills in Holm method; significant comparisons by site
+
+# Sqrt
+fit2 <-lm(Sqrt_Gly~Site, na.action = na.exclude, data=set2)
+summary(fit2) # one significant
+Anova(fit2, type="III") # significant
+test_gly <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_gly) # no significant comparisons by site
+kruskal.test(Sqrt_Gly~Site, data=set2) # significant
+dunnTest(Sqrt_Gly~Site, data=set2) # Automatically fills in Holm method; significant comparisons by site
+
+# Cube
+fit2 <-lm(g_cube2~Site, na.action = na.exclude, data=set2)
+summary(fit2) # none significant
+Anova(fit2, type="III") # not significant
+kruskal.test(g_cube2~Site, data=set2) # significant
+dunnTest(g_cube2~Site, data=set2) # Automatically fills in Holm method; significant comparisons by site
+
+# Recp
+fit2 <-lm(g_recp2~Site, na.action = na.exclude, data=set2)
+summary(fit2) # none significant
+Anova(fit2, type="III") # significant
+test_gly <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_gly) # no significant comparisons by site
+kruskal.test(g_recp2~Site, data=set2) # not significant
+dunnTest(g_recp2~Site, data=set2) # Automatically fills in Holm method; significant comparisons by site
+```
+
+```{r}
+## Condition index 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(ConditionIndex~Site, na.action = na.exclude, data=set2)
+summary(fit2) # significant
+Anova(fit2, type="III") # significant
+test_CI <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_CI) # significant comparisons by site
+kruskal.test(ConditionIndex~Site, data=set2) # significant
+dunnTest(ConditionIndex~Site, data=set2) # Automatically fills in Holm method; significant comparisons by site
+
+# Second, I will do the ANOVA test using the transformed (log, sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(Log_CI~Site, na.action = na.exclude, data=set2)
+summary(fit2) # significant
+Anova(fit2, type="III") # significant
+test_CI <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_CI) # significant comparisons by site
+kruskal.test(Log_CI~Site, data=set2) # significant
+dunnTest(Log_CI~Site, data=set2) # Automatically fills in Holm method; significant comparisons by site
+
+# Sqrt
+fit2 <-lm(Sqrt_CI~Site, na.action = na.exclude, data=set2)
+summary(fit2) # significant
+Anova(fit2, type="III") # significant
+test_CI <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_CI) # significant comparisons by site
+kruskal.test(Sqrt_CI~Site, data=set2) # significant
+dunnTest(Sqrt_CI~Site, data=set2) # Automatically fills in Holm method; significant comparisons by site
+
+# Cube
+fit2 <-lm(CI_cube2~Site, na.action = na.exclude, data=set2)
+summary(fit2) # significant
+Anova(fit2, type="III") # significant
+test_CI <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_CI) # significant comparisons by site
+kruskal.test(CI_cube2~Site, data=set2) # significant
+dunnTest(CI_cube2~Site, data=set2) # Automatically fills in Holm method; significant comparisons by site
+
+# Recp
+fit2 <-lm(CI_recp2~Site, na.action = na.exclude, data=set2)
+summary(fit2) # significant
+Anova(fit2, type="III") # significant
+test_CI <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_CI) # significant comparisons by site
+kruskal.test(CI_recp2~Site, data=set2) # significant
+dunnTest(CI_recp2~Site, data=set2) # Automatically fills in Holm method; significant comparisons by site
+```
+
+```{r}
+## Delta Glycogen 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(P_DeltaGly_DW~Site, na.action = na.exclude, data=set2)
+summary(fit2) # none significant
+Anova(fit2, type="III") # not significant
+kruskal.test(P_DeltaGly_DW~Site, data=set2) # not significant
+
+# Second, I will do the ANOVA test using the transformed (log, sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(Log_Delta_Gly~Site, na.action = na.exclude, data=set2)
+summary(fit2) # none significant
+Anova(fit2, type="III") # not significant
+kruskal.test(Log_Delta_Gly~Site, data=set2) # significant
+dunnTest(Log_Delta_Gly~Site, data=set2) # Automatically fills in Holm method; significant comparisons by site
+
+# Sqrt
+fit2 <-lm(Sqrt_Delta_Gly~Site, na.action = na.exclude, data=set2)
+summary(fit2) 
+Anova(fit2, type="III") # not significant
+kruskal.test(Sqrt_Delta_Gly~Site, data=set2) # not significant
+
+# Cube
+fit2 <-lm(g_cube_delta~Site, na.action = na.exclude, data=set2)
+summary(fit2) # none significant
+Anova(fit2, type="III") # not significant
+kruskal.test(g_cube_delta~Site, data=set2) # not significant
+
+# Recp
+fit2 <-lm(g_recp_delta~Site, na.action = na.exclude, data=set2)
+summary(fit2) # none significant
+Anova(fit2, type="III") # not significant
+kruskal.test(g_recp_delta~Site, data=set2) # not significant
+```
+
+```{r}
+## Delta Condition index 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Delta_CI~Site, na.action = na.exclude, data=set2)
+summary(fit2) # significant
+Anova(fit2, type="III") # significant
+test_CI <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_CI) # significant comparisons by site
+kruskal.test(Delta_CI~Site, data=set2) # significant
+dunnTest(Delta_CI~Site, data=set2) # Automatically fills in Holm method; significant comparisons by site
+
+# Second, I will do the ANOVA test using the transformed (log, sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(Log_Delta_CI~Site, na.action = na.exclude, data=set2)
+summary(fit2) # significant
+Anova(fit2, type="III") # significant
+test_CI <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_CI) # significant comparisons by site
+kruskal.test(Log_Delta_CI~Site, data=set2) # significant
+dunnTest(Log_Delta_CI~Site, data=set2) # Automatically fills in Holm method; significant comparisons by site
+
+# Sqrt
+fit2 <-lm(Sqrt_Delta_CI~Site, na.action = na.exclude, data=set2)
+summary(fit2) # significant
+Anova(fit2, type="III") # significant
+test_CI <- glht(fit2, linfct = mcp(Site = "Tukey")) # post-hoc test
+summary(test_CI) # significant comparisons by site
+kruskal.test(Sqrt_Delta_CI~Site, data=set2) # significant
+dunnTest(Sqrt_Delta_CI~Site, data=set2) # Automatically fills in Holm method; significant comparisons by site
+
+# Recp
+fit2 <-lm(CI_recp_delta~Site, na.action = na.exclude, data=set2)
+summary(fit2) 
+Anova(fit2, type="III") # not significant
+kruskal.test(CI_recp_delta~Site, data=set2) # not significant
+```
+
+
+# Plot physiology variables variables 
+```{r}
+## Set 1 - Glycogen
+# calculate the glycogen average and SE to include in data frame to be put into ggplot
+
+MR = subset(set1, Site=="MR")
+MR_gly_mean = mean(MR$P_Glycogen_DW)
+MR_gly_se = std.error(MR$P_Glycogen_DW)
+
+PR = subset(set1, Site=="PR")
+PR_gly_mean = mean(PR$P_Glycogen_DW)
+PR_gly_se = std.error(PR$P_Glycogen_DW)
+
+UC = subset(set1, Site=="UC")
+UC_gly_mean = mean(UC$P_Glycogen_DW)
+UC_gly_se = std.error(UC$P_Glycogen_DW)
+
+VP = subset(set1, Site=="VP")
+VP_gly_mean = mean(VP$P_Glycogen_DW)
+VP_gly_se = std.error(VP$P_Glycogen_DW)
+
+# Make a data frame with the name (categorical variable - Site), the values (average of physiological measurements from each site) and se (standard error for each site)
+set1Gly = data.frame(name=c("Merroir", "Piankatank", "Urbanna Creek", "VIMS Pier"), 
+                     value = c(MR_gly_mean, PR_gly_mean, UC_gly_mean, VP_gly_mean), # mean
+                     se = c(MR_gly_se, PR_gly_se, UC_gly_se, VP_gly_se)) # standard error
+
+# Bar plot for glycogen Set1
+Gly_Set1 = ggplot(set1Gly, aes(x=name, y=value)) + #establishing what's going on the plot
+  geom_bar(stat = "identity", fill="gray", color = "black", size = 0.3, width = 0.5) + #its going to be a bar plot in these sizes, shapes, colors, etc
+  geom_errorbar(aes(x=name, ymin = value - se, ymax = value + se), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bars in specific size, shape, color, etc
+  ylab("Glycogen (% of DW)") + xlab("") + #x and y axes titles 
+  #ggtitle("Glycogen - Set1") + #title 
+  scale_y_continuous(expand = c(0,0)) + #making the bars sit right on the x axis-- no white space bt the bars and the actual axis
+  theme_minimal() + #setting the background theme
+  theme(axis.line = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+Gly_Set1
+# no significance 
+ggsave("output/SuppFigures/FigureS10.pdf", plot = Gly_Set1, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS10.png", plot = Gly_Set1, width = 8, height = 4)
+```
+
+```{r}
+## Set 1 - Condition index
+# calculate the CI average and SE to include in data frame to be put into ggplot
+
+MR_CI_mean = mean(MR$ConditionIndex)
+MR_CI_se = std.error(MR$ConditionIndex)
+
+PR_CI_mean = mean(PR$ConditionIndex)
+PR_CI_se = std.error(PR$ConditionIndex)
+
+UC_CI_mean = mean(UC$ConditionIndex)
+UC_CI_se = std.error(UC$ConditionIndex)
+
+VP_CI_mean = mean(VP$ConditionIndex)
+VP_CI_se = std.error(VP$ConditionIndex)
+
+# Make a data frame with the name (categorical variable - Site), the values (average of physiological measurements from each site) and se (standard error for each site)
+set1CI = data.frame(name=c("Merroir", "Piankatank", "Urbanna Creek", "VIMS Pier"), 
+                     value = c(MR_CI_mean, PR_CI_mean, UC_CI_mean, VP_CI_mean), # mean
+                    se = c(MR_CI_se, PR_CI_se, UC_CI_se, VP_CI_se)) #std error
+                       
+# Bar plot for CI set1
+CI_Set1 = ggplot(set1CI, aes(x=name, y=value)) + #establishing what's going on the plot
+  geom_bar(stat = "identity", fill="gray", color = "black", size = 0.3, width = 0.5) + # bar plot in these sizes, shapes, colors, etc
+  geom_errorbar(aes(x=name, ymin = value - se, ymax = value + se), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bar in specific size, shape, color, etc
+  geom_text(label = c("A", "A", "A", "B"), aes(y = c(6.88, 7.91, 7.83, 4.89), x = name), size = 4) + # adding letters to indicate significant differences 
+  ylab("Condition Index") + xlab("") + # titles for x and y axes
+  #ggtitle("Condition Index - Set1") + # figure title 
+  scale_y_continuous(expand = c(0,0), limits = c(0,9)) + #making the bars sit right on the x axis-- no white space bt the bars and the actual axis
+  theme_minimal() + #setting the background theme
+  theme(axis.line = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+CI_Set1
+# significance labels: A, A, A, B
+ggsave("output/SuppFigures/FigureS9.pdf", plot = CI_Set1, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS9.png", plot = CI_Set1, width = 8, height = 4)
+```
+
+```{r}
+## Set 2 - Glycogen
+# calculate the gly average and SE to include in data frame to be put into ggplot
+
+MR2 = subset(set2, Site=="MR")
+MR2_gly_mean = mean(MR2$P_Glycogen_DW)
+MR2_gly_se = std.error(MR2$P_Glycogen_DW)
+
+PR2 = subset(set2, Site=="PR")
+PR2_gly_mean = mean(PR2$P_Glycogen_DW)
+PR2_gly_se = std.error(PR2$P_Glycogen_DW)
+
+UC2 = subset(set2, Site=="UC")
+UC2_gly_mean = mean(UC2$P_Glycogen_DW)
+UC2_gly_se = std.error(UC2$P_Glycogen_DW)
+
+VP2 = subset(set2, Site=="VP")
+VP2_gly_mean = mean(VP2$P_Glycogen_DW)
+VP2_gly_se = std.error(VP2$P_Glycogen_DW)
+
+#make a data frame with the name (categorical variable - Site), the values (average of physiological measurements from each site) and se (standard error for each site)
+set2Gly = data.frame(name=c("Merroir", "Piankatank", "Urbanna Creek", "VIMS Pier"), 
+                     value = c(MR2_gly_mean, PR2_gly_mean, UC2_gly_mean, VP2_gly_mean), # mean
+                     se = c(MR2_gly_se, PR2_gly_se, UC2_gly_se, VP2_gly_se)) # std error 
+
+# Bar plot for glycogen set 2
+p_GlySet2 <- ggplot(set2Gly, aes(x=name, y=value)) + # establishes whats going on in plot 
+  geom_bar(stat = "identity", fill="gray", color = "black", size = 0.3, width = 0.5) + # bar plot in these sizes, shapes, colors, etc
+  geom_errorbar(aes(x=name, ymin = value - se, ymax = value + se), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bar in specific size, shape, color, etc
+  ylab("Glycogen (% of DW)") + xlab("") + #x and y axes titles 
+  #ggtitle("Glycogen - Set2") + # figure title 
+  scale_y_continuous(expand = c(0,0)) + # making the bars sit flush with the x axis
+  theme_minimal() + # setting background theme
+  theme(axis.line = element_line(), axis.text.x = element_text(size = 12, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, color = "black"), axis.title.y = element_text(size = 15)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+p_GlySet2
+# no significance 
+```
+
+```{r}
+## Set 2 - Delta Glycogen
+# calculate the delta gly average and SE to include in data frame to be put into ggplot
+
+MR2_delta_gly_mean = mean(MR2$P_DeltaGly_DW)
+MR2_delta_gly_se = std.error(MR2$P_DeltaGly_DW)
+
+PR2_delta_gly_mean = mean(PR2$P_DeltaGly_DW)
+PR2_delta_gly_se = std.error(PR2$P_DeltaGly_DW)
+
+UC2_delta_gly_mean = mean(UC2$P_DeltaGly_DW)
+UC2_delta_gly_se = std.error(UC2$P_DeltaGly_DW)
+
+VP2_delta_gly_mean = mean(VP2$P_DeltaGly_DW)
+VP2_delta_gly_se = std.error(VP2$P_DeltaGly_DW)
+
+# Make a data frame with the name (categorical variable - Site), the values (average of physiological measurements from each site) and se (standard error for each site)
+set2DeltaGly = data.frame(name=c("Merroir", "Piankatank", "Urbanna Creek", "VIMS Pier"), 
+                     value = c(MR2_delta_gly_mean, PR2_delta_gly_mean, UC2_delta_gly_mean, VP2_delta_gly_mean), # mean
+                     se = c(MR2_delta_gly_se, PR2_delta_gly_se, UC2_delta_gly_se, VP2_delta_gly_se))
+
+# Bar plot of delta glycogen
+p3 = ggplot(set2DeltaGly, aes(x=name, y=value)) + # establishes whats going on in plot 
+  geom_bar(stat = "identity", fill="gray", color = "black", size = 0.3, width = 0.75) + # bar plot in these sizes, shapes, colors, etc
+  geom_errorbar(aes(x=name, ymin = value - se, ymax = value + se), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bar in specific size, shape, color, etc
+  #geom_text(label = c("A", "A", "A", "A"), aes(y = c(1.5, 7.3, 4.0, 11.0), x = name), size = 6) +
+  ylab("Change in Glycogen Content") + xlab("") + # titles for x and y axes
+  #ggtitle("Delta Glycogen") + # figure title 
+  geom_hline(aes(yintercept = 0)) + # making the bars sit flush with the x axis
+  theme_minimal() + # setting background theme
+  theme(axis.line.y = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+p3
+# no significance 
+```
+
+```{r}
+## Set 2 - Condition Index
+# calculate the CI average and SE to include in data frame to be put into ggplot
+
+MR2_CI_mean = mean(MR2$ConditionIndex)
+MR2_CI_se = std.error(MR2$ConditionIndex)
+
+PR2_CI_mean = mean(PR2$ConditionIndex)
+PR2_CI_se = std.error(PR2$ConditionIndex)
+
+UC2_CI_mean = mean(UC2$ConditionIndex)
+UC2_CI_se = std.error(UC2$ConditionIndex)
+
+VP2_CI_mean = mean(VP2$ConditionIndex)
+VP2_CI_se = std.error(VP2$ConditionIndex)
+
+
+# Make a data frame with the name (categorical variable - Site), the values (average of physiological measurements from each site) and se (standard error for each site)
+set2CI = data.frame(name=c("Merroir", "Piankatank", "Urbanna Creek", "VIMS Pier"), 
+                     value = c(MR2_CI_mean, PR2_CI_mean, UC2_CI_mean, VP2_CI_mean), # mean
+                    se = c(MR2_CI_se, PR2_CI_se, UC2_CI_se, VP2_CI_se)) # std error
+
+# Bar plot of CI set2
+p_CISet2 <- ggplot(set2CI, aes(x=name, y=value)) + # establishing whats going on in plot
+  geom_bar(stat = "identity", fill="gray", color = "black", size = 0.3, width = 0.5) +  # bar plot in these sizes, shapes, colors, etc
+  geom_errorbar(aes(x=name, ymin = value - se, ymax = value + se), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bar in specific size, shape, color, etc
+  geom_text(label = c("AB", "AB", "A", "B"), aes(y = c(5.7, 5.7, 6.6, 5.25), x = name), size = 4) + # adding letters to indicate significance 
+  ylab("Condition Index") + xlab("") + # x and y axes titles 
+  #ggtitle("Condition Index Set2") + # figure title 
+  scale_y_continuous(expand = c(0,0)) + # making the bars sit flush with the x axis
+  expand_limits(y = 7) + 
+  theme_minimal() + # setting background theme 
+  theme(axis.line = element_line(), axis.text.x = element_text(size = 12, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, color = "black"), axis.title.y = element_text(size = 15)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+p_CISet2
+# significance labels: AB, AB, A, B
+```
+
+```{r}
+## Set 2 - Delta Condition Index
+# calculate the delt CI average and SE to include in data frame to be put into ggplot
+
+MR2_delta_CI_mean = mean(MR2$Delta_CI)
+MR2_delta_CI_se = std.error(MR2$Delta_CI)
+
+PR2_delta_CI_mean = mean(PR2$Delta_CI)
+PR2_delta_CI_se = std.error(PR2$Delta_CI)
+
+UC2_delta_CI_mean = mean(UC2$Delta_CI)
+UC2_delta_CI_se = std.error(UC2$Delta_CI)
+
+VP2_delta_CI_mean = mean(VP2$Delta_CI)
+VP2_delta_CI_se = std.error(VP2$Delta_CI)
+
+#make a data frame with the name (categorical variable - Site), the values (average of physiological measurements from each site) and se (standard error for each site)
+set2DeltaCI = data.frame(name=c("Merroir", "Piankatank", "Urbanna Creek", "VIMS Pier"), 
+                          value = c(MR2_delta_CI_mean, PR2_delta_CI_mean, UC2_delta_CI_mean, VP2_delta_CI_mean), # mean
+                         se = c(MR2_delta_CI_se, PR2_delta_CI_se, UC2_delta_CI_se, VP2_delta_CI_se))
+                            
+# Bar plot of delta CI
+p4 = ggplot(set2DeltaCI, aes(x=name, y=value)) + # establishing whats going on in plot
+  geom_bar(stat = "identity", fill="gray", color = "black", size = 0.3, width = 0.5) + # bar plot in these sizes, shapes, colors, etc
+  geom_errorbar(aes(x=name, ymin = value - se, ymax = value + se), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bar in specific size, shape, color, etc
+  geom_text(label = c("A", "B", "AB", "C"), aes(y = c(0.15, 0.15, 0.15, 0.86), x = name), size = 4) + # adding letters to indicate significance 
+  ylab("Change in Condition Index") + xlab("") + # x and y axes titles
+  #ggtitle("Delta Condition Index") + # figure title 
+  geom_hline(aes(yintercept = 0)) + # making the bars sit flush with the x axis
+  theme_minimal() + # setting background theme
+  theme(axis.line.y = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+p4
+#significance labels: A, B, AB, C
+```
+
+
+
+

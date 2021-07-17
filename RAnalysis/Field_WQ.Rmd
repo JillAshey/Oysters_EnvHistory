@@ -1165,7 +1165,7 @@ PR_VP2 <- rbind(PR,VP_2)
 PR_VP2$Site <- as.factor(PR_VP2$Site)
 ```
 
-## Compare field water quality by MR and VP-2 sites
+## Compare field water quality by PR and VP-2 sites
 
 ```{r}
 ## Temperature 
