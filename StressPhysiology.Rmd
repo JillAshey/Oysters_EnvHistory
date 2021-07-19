@@ -1,0 +1,54 @@
+---
+title: "Stress Physiology"
+author: "jillashey"
+date: "7/18/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load libraries
+library(car)
+library(rcompanion)
+library(gdata)
+library(multcomp)
+library(nlme)
+library(MASS)
+library(lme4)
+library(FSA)
+library(tidyverse)
+library(devtools)
+library(gridExtra)
+library(plotrix)
+library(ggpubr)
+```
+
+```{r}
+phys <- read.csv("data/FRAP/HT_FRAP_bothSets_042320.csv", header = T)
+head(phys)
+phys$Site <- as.factor(phys$Site)
+phys$Treatment <- as.factor(phys$Treatment)
+set1 <- filter(phys, Set  == "Set1")
+set2 <- filter(phys, Set  == "Set2")
+```
+
+# Set1
+# Evaluate normality for all variables 
+
+Evaluate normality using histograms, Levene's test, Bartlett test, and QQplots.
+- Levene's test: more robust to departures from normality than Bartlett's test; p>0.05 means the variances are equal
+- Bartlett test: If the data is normally distributed, this is the best test to use. It is more likely to return a "false positive" when the data is non-normal; p>0.05 means the variances are equal
+- Q-Q plot: tests the hypothesis that the data is normally distributed.  If the points on the plot are reasonably well approximated by a straight line, the popular Gaussian data hypothesis is plausible, while marked deviations from linearity provide evidence against this hypothesis and these data points should be removed. 
+
+```{r}
+
+```
+
+
+
+
+
+
+
+

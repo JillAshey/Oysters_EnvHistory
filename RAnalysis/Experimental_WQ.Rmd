@@ -1,0 +1,2001 @@
+---
+title: "Experimental_WQ"
+author: "jillashey"
+date: "7/16/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load libraries
+library(car)
+library(rcompanion)
+library(gdata)
+library(multcomp)
+library(nlme)
+library(MASS)
+library(lme4)
+library(FSA)
+library(tidyverse)
+```
+
+# Read in data
+```{r}
+exp_WQ <- read.csv("data/ExperimentalWQ/HT_WaterQuality_Experiment.csv", header = T, na.strings=c("","NA"))
+Water_Set1 <- filter(exp_WQ, Set  == "Set1")
+Water_Set2 <- filter(exp_WQ, Set  == "Set2")
+```
+
+# Evaluate normality for all WQ variables 
+
+Evaluate normality using histograms, Levene's test, Bartlett test, and QQplots.
+- Levene's test: more robust to departures from normality than Bartlett's test; p>0.05 means the variances are equal
+- Bartlett test: If the data is normally distributed, this is the best test to use. It is more likely to return a "false positive" when the data is non-normal; p>0.05 means the variances are equal
+- Q-Q plot: tests the hypothesis that the data is normally distributed.  If the points on the plot are reasonably well approximated by a straight line, the popular Gaussian data hypothesis is plausible, while marked deviations from linearity provide evidence against this hypothesis and these data points should be removed.  
+
+# Set1
+```{r}
+## Temperature - set 1
+# Evaluate normality
+hist(Water_Set1$Temp)
+plotNormalHistogram(Water_Set1$Temp)
+leveneTest(Temp~Treatment, data=Water_Set1) # not normal 
+bartlett.test(Temp~Treatment, data=Water_Set1) # not normal 
+fit<-lm(Temp~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+t_log1 = log(Water_Set1$Temp)
+plotNormalHistogram(t_log1)
+t_sqrt1 = sqrt(Water_Set1$Temp)
+plotNormalHistogram(t_sqrt1) 
+t_cube1 = sign(Water_Set1$Temp) * abs(Water_Set1$Temp)^(1/3)
+plotNormalHistogram(t_cube1) 
+t_recp1 = 1/(Water_Set1$Temp)
+plotNormalHistogram(t_recp1)
+# Based on initial histograms, log, sqrt and cube look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+Water_Set1 = cbind(Water_Set1, t_log1, t_sqrt1, t_cube1)
+
+# Log 
+leveneTest(t_log1~Treatment, data=Water_Set1) #not normal
+bartlett.test(t_log1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(t_log1~Treatment, data=Water_Set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Sqrt 
+leveneTest(t_sqrt1~Treatment, data=Water_Set1) #not normal
+bartlett.test(t_sqrt1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(t_sqrt1~Treatment, data=Water_Set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+#similar looking to the untransformed variable 
+
+# Cube
+leveneTest(t_cube1~Treatment, data=Water_Set1) #not normal
+bartlett.test(t_cube1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(t_cube1~Treatment, data=Water_Set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+##None are relevant enough to transform the data - NOT TRANSFORMED
+##but there is no indication of normality - may have to use the Dunn test 
+```
+
+```{r}
+## Salinity 
+# Evaluate normality
+hist(Water_Set1$Sal)
+plotNormalHistogram(Water_Set1$Sal)
+leveneTest(Sal~Treatment, data=Water_Set1) #not normal 
+bartlett.test(Sal~Treatment, data=Water_Set1) #not normal 
+fit<-lm(Sal~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+Slog1 = log(Water_Set1$Sal) 
+plotNormalHistogram(Slog1)
+Ssqrt1 = sqrt(Water_Set1$Sal)
+plotNormalHistogram(Ssqrt1)
+Scube1= sign(Water_Set1$Sal) * abs(Water_Set1$Sal)^(1/3)
+plotNormalHistogram(Scube1)
+Srecp1 = 1/(Water_Set1$Sal) 
+plotNormalHistogram(Srecp1)
+# Based on initial histograms, log and recp look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+Water_Set1 = cbind(Water_Set1, Slog1, Srecp1)
+
+#log sal analyses
+leveneTest(Slog1~Treatment, data=Water_Set1) #not normal
+bartlett.test(Slog1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(Slog1~Treatment, data=Water_Set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+#similar looking to the untransformed variable, but could maybe use? 
+
+#recp sal analyses
+leveneTest(Srecp1~Treatment, data=Water_Set1) #not normal
+bartlett.test(Srecp1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(Srecp1~Treatment, data=Water_Set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+## Do not use
+
+##None are relevant enough to transform the data - NOT TRANSFORMED
+##but there is no indication of normality - may have to use the Dunn test 
+```
+
+```{r}
+## DO
+# Evaluate normality
+Water_Set1$DO_mg = as.numeric(Water_Set1$DO_mg) #for some reason, DO variable was read as a factor, so had to convert it to numeric variable 
+hist(Water_Set1$DO_mg)
+plotNormalHistogram(Water_Set1$DO_mg)
+leveneTest(DO_mg~Treatment, data=Water_Set1) # normal 
+bartlett.test(DO_mg~Treatment, data=Water_Set1) #not normal 
+fit<-lm(DO_mg~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+DOlog1 = log(Water_Set1$DO_mg) #no
+plotNormalHistogram(DOlog1)
+DOsqrt1 = sqrt(Water_Set1$DO_mg) #square root transform
+plotNormalHistogram(DOsqrt1) 
+DOcube1 = sign(Water_Set1$DO_mg) * abs(Water_Set1$DO_mg)^(1/3) #cube root transform
+plotNormalHistogram(DOcube1) 
+DOrecp1 = 1/(Water_Set1$DO_mg) 
+plotNormalHistogram(DOrecp1)
+# Based on initial histograms, log, sqrt, and cube look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+Water_Set1 = cbind(Water_Set1, DOlog1, DOsqrt1, DOcube1)
+
+# Log
+leveneTest(DOlog1~Treatment, data=Water_Set1) # normal
+bartlett.test(DOlog1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(DOlog1~Treatment, data=Water_Set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Sqrt
+leveneTest(DOsqrt1~Treatment, data=Water_Set1) # normal
+bartlett.test(DOsqrt1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(DOsqrt1~Treatment, data=Water_Set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+#cube DO analyses
+leveneTest(DOcube1~Treatment, data=Water_Set1) # normal
+bartlett.test(DOcube1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(DOcube1~Treatment, data=Water_Set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+##DO variable and transformed variables don't look too good 
+```
+
+```{r}
+## Spec pH
+# Evaluate normality
+hist(Water_Set1$spec_pH)
+plotNormalHistogram(Water_Set1$spec_pH)
+leveneTest(spec_pH~Water_Set1$Treatment, data=Water_Set1) #normal
+bartlett.test(spec_pH~Treatment, data=Water_Set1) #not normal 
+fit<-lm(spec_pH~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##Looks a bit wacky 
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+pHlog1 = log(Water_Set1$spec_pH) 
+plotNormalHistogram(pHlog1)
+pHsqrt1 = sqrt(Water_Set1$spec_pH) 
+plotNormalHistogram(pHsqrt1)
+pHcube1= sign(Water_Set1$spec_pH) * abs(Water_Set1$spec_pH)^(1/3) 
+plotNormalHistogram(pHcube1)
+pHrecp1 = 1/(Water_Set1$spec_pH) 
+plotNormalHistogram(pHrecp1)
+# Based on initial histograms, log, sqrt, cube and recp look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+Water_Set1 = cbind(Water_Set1, pHlog1, pHsqrt1, pHcube1, pHrecp1)
+
+# Log
+leveneTest(pHlog1~Treatment, data=Water_Set1) #normal
+bartlett.test(pHlog1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(pHlog1~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##looks similar to the untransformed variable qqplot 
+
+# Sqrt
+leveneTest(pHsqrt1~Treatment, data=Water_Set1) #normal
+bartlett.test(pHsqrt1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(pHsqrt1~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##plot looks similar to untransformed variable
+
+# Cube   
+leveneTest(pHcube1~Treatment, data=Water_Set1) #normal
+bartlett.test(pHcube1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(pHcube1~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##similar to untransformed 
+
+# Recp  
+leveneTest(pHrecp1~Treatment, data=Water_Set1) #normal
+bartlett.test(pHrecp1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(pHrecp1~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+```
+
+```{r}
+## TA
+# Evaluate normality 
+hist(Water_Set1$TA)
+plotNormalHistogram(Water_Set1$TA)
+leveneTest(TA~Treatment, data=Water_Set1) #not normal
+bartlett.test(TA~Treatment, data=Water_Set1) #not normal
+fit<-lm(TA~Treatment, data=Water_Set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##decent
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+TAlog1 = log(Water_Set1$TA) 
+plotNormalHistogram(TAlog1)
+TAsqrt1 = sqrt(Water_Set1$TA)
+plotNormalHistogram(TAsqrt1)
+TAcube1 = sign(Water_Set1$TA) * abs(Water_Set1$TA)^(1/3) 
+plotNormalHistogram(TAcube1) 
+TArecp1 = 1/(Water_Set1$TA) 
+plotNormalHistogram(TArecp1)
+# Based on initial histograms, log, sqrt, and cube look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+Water_Set1 = cbind(Water_Set1, TAlog1, TAsqrt1, TAcube1)
+
+# Log
+leveneTest(TAlog1~Treatment, data=Water_Set1) #not normal
+bartlett.test(TAlog1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(TAlog1~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+#similar to untransformed variable
+
+# Sqrt
+leveneTest(TAsqrt1~Treatment, data=Water_Set1) #not normal
+bartlett.test(TAsqrt1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(TAsqrt1~Treatment, data=Water_Set1)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##similar to untransformed variable 
+
+# Cube
+leveneTest(TAcube1~Treatment, data=Water_Set1) #not normal
+bartlett.test(TAcube1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(TAcube1~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##similar to untransformed variable 
+
+```
+
+```{r}
+## pCO2
+# Evaluate normality 
+hist(Water_Set1$pCO2)
+plotNormalHistogram(Water_Set1$pCO2)
+leveneTest(pCO2~Treatment, data=Water_Set1) #normal
+bartlett.test(pCO2~Treatment, data=Water_Set1) #not normal
+fit<-lm(pCO2~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##goes up off the line on right hand side 
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+pCO2log1 = log(Water_Set1$pCO2) #log transform
+plotNormalHistogram(pCO2log1) 
+pCO2sqrt1 = sqrt(Water_Set1$pCO2) #square root transform
+plotNormalHistogram(pCO2sqrt1) 
+pCO2cube1 = sign(Water_Set1$pCO2) * abs(Water_Set1$pCO2)^(1/3) #cube root transform
+plotNormalHistogram(pCO2cube1) 
+pCO2recp1 = 1/(Water_Set1$pCO2) #reciprocal transform
+plotNormalHistogram(pCO2recp1) 
+# Based on initial histograms, log, sqrt, cube, and recp look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+Water_Set1 = cbind(Water_Set1, pCO2log1, pCO2sqrt1, pCO2cube1, pCO2recp1)
+
+# Log
+leveneTest(pCO2log1~Treatment, data=Water_Set1) #normal
+bartlett.test(pCO2log1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(pCO2log1~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##similar to untransformed variable, but worse qqplot
+
+# Sqrt
+leveneTest(pCO2sqrt1~Treatment, data=Water_Set1) #normal
+bartlett.test(pCO2sqrt1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(pCO2sqrt1~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Cube
+leveneTest(pCO2cube1~Treatment, data=Water_Set1) #normal
+bartlett.test(pCO2cube1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(pCO2cube1~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+#recp transform
+leveneTest(pCO2recp1~Treatment, data=Water_Set1) #not normal
+bartlett.test(pCO2recp1~Treatment, data=Water_Set1) #not normal 
+fit<-lm(pCO2recp1~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##no good for this one
+```
+
+```{r}
+## Omega Ca
+# Evaluate normality 
+hist(Water_Set1$OmegaCa)
+plotNormalHistogram(Water_Set1$OmegaCa)
+leveneTest(OmegaCa~Treatment, data=Water_Set1) #not normal
+bartlett.test(OmegaCa~Treatment, data=Water_Set1) #not normal
+fit<-lm(OmegaCa~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+Calog1 = log(Water_Set1$OmegaCa)
+plotNormalHistogram(Calog1) 
+Casqrt1 = sqrt(Water_Set1$OmegaCa)
+plotNormalHistogram(Casqrt1)
+Cacube1= sign(Water_Set1$OmegaCa) * abs(Water_Set1$OmegaCa)^(1/3)
+plotNormalHistogram(Cacube1) 
+Carecp1 = 1/(Water_Set1$OmegaCa) 
+plotNormalHistogram(Carecp1) 
+# Based on initial histograms, log, sqrt, and cube look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+Water_Set1 = cbind(Water_Set1, Calog1, Casqrt1, Cacube1)
+
+# Log
+leveneTest(Calog1~Treatment, data=Water_Set1) #not normal
+bartlett.test(Calog1~Treatment, data=Water_Set1) #not normal
+fit<-lm(Calog1~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Sqrt
+leveneTest(Casqrt1~Treatment, data=Water_Set1) #not normal
+bartlett.test(Casqrt1~Treatment, data=Water_Set1) #not normal
+fit<-lm(Casqrt1~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Cube 
+leveneTest(Cacube1~Treatment, data=Water_Set1) #not normal
+bartlett.test(Cacube1~Treatment, data=Water_Set1) #not normal
+fit<-lm(Cacube1~Treatment, data=Water_Set1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+#also not great 
+```
+
+
+
+# Set2
+```{r}
+## Temperature - set 2
+# Evaluate normality
+hist(Water_Set2$Temp)
+plotNormalHistogram(Water_Set2$Temp)
+leveneTest(Temp~Treatment, data=Water_Set2) # not normal 
+bartlett.test(Temp~Treatment, data=Water_Set2) # not normal 
+fit<-lm(Temp~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+t_log2 = log(Water_Set2$Temp)
+plotNormalHistogram(t_log2)
+t_sqrt2 = sqrt(Water_Set2$Temp)
+plotNormalHistogram(t_sqrt2) 
+t_cube2 = sign(Water_Set2$Temp) * abs(Water_Set2$Temp)^(1/3)
+plotNormalHistogram(t_cube2) 
+t_recp2 = 1/(Water_Set2$Temp)
+plotNormalHistogram(t_recp2)
+# Based on initial histograms, log, sqrt, cube and recp look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+Water_Set2 = cbind(Water_Set2, t_log2, t_sqrt2, t_cube2, t_recp2)
+
+# Log 
+leveneTest(t_log2~Treatment, data=Water_Set2) #not normal
+bartlett.test(t_log2~Treatment, data=Water_Set2) #not normal 
+fit<-lm(t_log2~Treatment, data=Water_Set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Sqrt 
+leveneTest(t_sqrt2~Treatment, data=Water_Set2) #not normal
+bartlett.test(t_sqrt2~Treatment, data=Water_Set2) #not normal 
+fit<-lm(t_sqrt2~Treatment, data=Water_Set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Cube
+leveneTest(t_cube2~Treatment, data=Water_Set2) #not normal
+bartlett.test(t_cube2~Treatment, data=Water_Set2) #not normal 
+fit<-lm(t_cube2~Treatment, data=Water_Set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Recp
+leveneTest(t_recp2~Treatment, data=Water_Set2) #not normal
+bartlett.test(t_recp2~Treatment, data=Water_Set2) #not normal 
+fit<-lm(t_recp2~Treatment, data=Water_Set2)
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# all look bad - may just do the K-w test 
+```
+
+```{r}
+## Salinity 
+# Evaluate normality
+hist(Water_Set2$Sal)
+plotNormalHistogram(Water_Set2$Sal)
+leveneTest(Sal~Treatment, data=Water_Set2) #not normal 
+bartlett.test(Sal~Treatment, data=Water_Set2) #normal 
+fit<-lm(Sal~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##eh not good
+
+# Transform the variable using log, sqrt, and cube & look at histograms of transformed values
+s_log2 = log(Water_Set2$Sal)
+plotNormalHistogram(s_log2)
+s_sqrt2 = sqrt(Water_Set2$Sal)
+plotNormalHistogram(s_sqrt2) 
+s_cube2 = sign(Water_Set2$Sal) * abs(Water_Set2$Sal)^(1/3)
+plotNormalHistogram(s_cube2) 
+s_recp2 = 1/(Water_Set2$Sal)
+plotNormalHistogram(s_recp2)
+# Based on initial histograms, log, sqrt, and cube look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set
+Water_Set2 = cbind(Water_Set2, s_log2, s_sqrt2, s_cube2)
+
+# Log
+leveneTest(s_log2~Treatment, data=Water_Set2) #not normal
+bartlett.test(s_log2~Treatment, data=Water_Set2) #not normal
+fit<-lm(s_log2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##not good
+
+# Sqrt
+leveneTest(s_sqrt2~Treatment, data=Water_Set2) #not normal
+bartlett.test(s_sqrt2~Treatment, data=Water_Set2) #not normal
+fit<-lm(s_sqrt2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Cube
+leveneTest(s_sqrt2~Treatment, data=Water_Set2) #not normal
+bartlett.test(s_sqrt2~Treatment, data=Water_Set2) #not normal
+fit<-lm(s_sqrt2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# all look similar to untransformed
+```
+
+```{r}
+## DO mg 
+# Evaluate normality 
+Water_Set2$DO_mg = as.numeric(Water_Set2$DO_mg) #for some reason, DO variable was read as a factor, so had to convert it to numeric variable 
+hist(Water_Set2$DO_mg)
+plotNormalHistogram(Water_Set2$DO_mg)
+leveneTest(DO_mg~Treatment, data=Water_Set2) #normal 
+bartlett.test(DO_mg~Treatment, data=Water_Set2) #not normal 
+fit<-lm(DO_mg~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+# not bad
+
+# Transform the variable using log, sqrt, and cube & look at histograms of transformed values
+do_log2 = log(Water_Set2$DO_mg)
+plotNormalHistogram(do_log2)
+do_sqrt2 = sqrt(Water_Set2$DO_mg)
+plotNormalHistogram(do_sqrt2) 
+do_cube2 = sign(Water_Set2$DO_mg) * abs(Water_Set2$DO_mg)^(1/3)
+plotNormalHistogram(do_cube2) 
+do_recp2 = 1/(Water_Set2$DO_mg)
+plotNormalHistogram(do_recp2)
+# Based on initial histograms, log, sqrt, cube and recp look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set
+Water_Set2 = cbind(Water_Set2, do_log2, do_sqrt2, do_cube2, do_recp2)
+
+# Log
+leveneTest(do_log2~Treatment, data=Water_Set2) #normal
+bartlett.test(do_log2~Treatment, data=Water_Set2) #normal
+fit<-lm(do_log2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##decent 
+
+# Sqrt 
+leveneTest(do_sqrt2~Treatment, data=Water_Set2) #normal
+bartlett.test(do_sqrt2~Treatment, data=Water_Set2) #not normal
+fit<-lm(do_sqrt2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+#Just okay
+
+# Cube 
+leveneTest(do_cube2~Treatment, data=Water_Set2) #normal
+bartlett.test(do_cube2~Treatment, data=Water_Set2) #not normal
+fit<-lm(do_cube2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##eh
+
+# Recp
+leveneTest(do_recp2~Treatment, data=Water_Set2) #normal
+bartlett.test(do_recp2~Treatment, data=Water_Set2) #normal
+fit<-lm(do_recp2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##pretty good 
+```
+
+```{r}
+## Spec pH
+# Evaluate normality
+hist(Water_Set2$spec_pH)
+plotNormalHistogram(Water_Set2$spec_pH)
+leveneTest(spec_pH~Treatment, data=Water_Set2) #normal 
+bartlett.test(spec_pH~Treatment, data=Water_Set2) #normal 
+fit<-lm(spec_pH~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, and cube & look at histograms of transformed values
+pH_log2 = log(Water_Set2$spec_pH)
+plotNormalHistogram(pH_log2)
+pH_sqrt2 = sqrt(Water_Set2$spec_pH)
+plotNormalHistogram(pH_sqrt2) 
+pH_cube2 = sign(Water_Set2$spec_pH) * abs(Water_Set2$spec_pH)^(1/3)
+plotNormalHistogram(pH_cube2) 
+pH_recp2 = 1/(Water_Set2$spec_pH)
+plotNormalHistogram(pH_recp2)
+# Based on initial histograms, log, sqrt and recp look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set
+Water_Set2 = cbind(Water_Set2, pH_log2, pH_sqrt2, pH_recp2)
+
+# Log
+leveneTest(pH_log2~Treatment, data=Water_Set2) #normal 
+bartlett.test(pH_log2~Treatment, data=Water_Set2) #normal 
+fit<-lm(pH_log2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Sqrt
+leveneTest(pH_sqrt2~Treatment, data=Water_Set2) #normal 
+bartlett.test(pH_sqrt2~Treatment, data=Water_Set2) #normal 
+fit<-lm(pH_sqrt2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Recp
+leveneTest(pH_recp2~Treatment, data=Water_Set2) #normal 
+bartlett.test(pH_recp2~Treatment, data=Water_Set2) #normal 
+fit<-lm(pH_recp2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+```
+
+```{r}
+## TA 
+# Evaluate normality 
+hist(Water_Set2$TA)
+plotNormalHistogram(Water_Set2$TA)
+leveneTest(TA~Treatment, data=Water_Set2) #not normal 
+bartlett.test(TA~Treatment, data=Water_Set2) #not normal 
+fit<-lm(TA~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##step-like pattern
+
+# Transform the variable using log, sqrt, and cube & look at histograms of transformed values
+TA_log2 = log(Water_Set2$TA)
+plotNormalHistogram(TA_log2)
+TA_sqrt2 = sqrt(Water_Set2$TA)
+plotNormalHistogram(TA_sqrt2) 
+TA_cube2 = sign(Water_Set2$TA) * abs(Water_Set2$TA)^(1/3)
+plotNormalHistogram(TA_cube2) 
+TA_recp2 = 1/(Water_Set2$TA)
+plotNormalHistogram(TA_recp2)
+# Based on initial histograms, log, sqrt, cube and recp look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set
+Water_Set2 = cbind(Water_Set2, TA_log2, TA_sqrt2, TA_cube2, TA_recp2)
+
+# Log
+leveneTest(TA_log2~Treatment, data=Water_Set2) #not normal 
+bartlett.test(TA_log2~Treatment, data=Water_Set2) #not normal 
+fit<-lm(TA_log2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##similar to original variable 
+
+# Sqrt
+leveneTest(TA_sqrt2~Treatment, data=Water_Set2) #not normal 
+bartlett.test(TA_sqrt2~Treatment, data=Water_Set2) #not normal 
+fit<-lm(TA_sqrt2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##similar to original variable 
+
+# Cube
+leveneTest(TA_cube2~Treatment, data=Water_Set2) #not normal 
+bartlett.test(TA_cube2~Treatment, data=Water_Set2) #not normal 
+fit<-lm(TA_cube2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##similar to original variable 
+
+# Recp
+leveneTest(TA_recp2~Treatment, data=Water_Set2) #normal 
+bartlett.test(TA_recp2~Treatment, data=Water_Set2) #not normal 
+fit<-lm(TA_recp2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##kinda similar to original just shifted down a little...
+```
+
+```{r}
+## pCO2 
+# Evaluate normality
+hist(Water_Set2$pCO2)
+plotNormalHistogram(Water_Set2$pCO2)
+leveneTest(pCO2~Treatment, data=Water_Set2) #normal 
+bartlett.test(pCO2~Treatment, data=Water_Set2) #not normal 
+fit<-lm(pCO2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and recp & look at histograms of transformed values
+CO_log2 = log(Water_Set2$pCO2)
+plotNormalHistogram(CO_log2)
+CO_sqrt2 = sqrt(Water_Set2$pCO2)
+plotNormalHistogram(CO_sqrt2) 
+CO_cube2 = sign(Water_Set2$pCO2) * abs(Water_Set2$pCO2)^(1/3)
+plotNormalHistogram(CO_cube2)
+CO_recp2 = 1/(Water_Set2$pCO2)
+plotNormalHistogram(CO_recp2)
+# Based on initial histograms, log, sqrt, cube and recp look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set
+Water_Set2 = cbind(Water_Set2, CO_log2, CO_sqrt2, CO_cube2, CO_recp2)
+
+# Log 
+leveneTest(CO_log2~Treatment, data=Water_Set2) #normal 
+bartlett.test(CO_log2~Treatment, data=Water_Set2) #not normal 
+fit<-lm(CO_log2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+#similar to original variable 
+
+# Sqrt 
+leveneTest(CO_sqrt2~Treatment, data=Water_Set2) #normal 
+bartlett.test(CO_sqrt2~Treatment, data=Water_Set2) #not normal 
+fit<-lm(CO_sqrt2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Cube 
+leveneTest(CO_cube2~Treatment, data=Water_Set2) #normal 
+bartlett.test(CO_cube2~Treatment, data=Water_Set2) #not normal 
+fit<-lm(CO_cube2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Recp
+leveneTest(CO_recp2~Treatment, data=Water_Set2) #normal 
+bartlett.test(CO_recp2~Treatment, data=Water_Set2) # normal 
+fit<-lm(CO_recp2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+```
+
+```{r}
+## Omega Ca
+# Evaluate normality 
+hist(Water_Set2$OmegaCa)
+plotNormalHistogram(Water_Set2$OmegaCa)
+leveneTest(OmegaCa~Treatment, data=Water_Set2) #not normal 
+bartlett.test(OmegaCa~Treatment, data=Water_Set2) #not normal 
+fit<-lm(OmegaCa~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+##not great
+
+# Transform the variable using log, sqrt, cube, and recp & look at histograms of transformed values
+Ca_log2 = log(Water_Set2$OmegaCa)
+plotNormalHistogram(Ca_log2)
+Ca_sqrt2 = sqrt(Water_Set2$OmegaCa)
+plotNormalHistogram(Ca_sqrt2) 
+Ca_cube2 = sign(Water_Set2$OmegaCa) * abs(Water_Set2$OmegaCa)^(1/3)
+plotNormalHistogram(Ca_cube2)
+Ca_recp2 = 1/(Water_Set2$OmegaCa)
+plotNormalHistogram(Ca_recp2)
+##use log, sqrt, cube, recp
+
+# Based on initial histograms, log, sqrt, cube and recp look sort of normal. Will evaluate normality in these transformed values 
+Water_Set2 = cbind(Water_Set2, Ca_log2, Ca_sqrt2, Ca_cube2, Ca_recp2)
+
+# Log
+leveneTest(Ca_log2~Treatment, data=Water_Set2) #not normal 
+bartlett.test(Ca_log2~Treatment, data=Water_Set2) #not normal 
+fit<-lm(Ca_log2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+#similar to original variable
+
+# Sqrt 
+leveneTest(Ca_sqrt2~Treatment, data=Water_Set2) #not normal 
+bartlett.test(Ca_sqrt2~Treatment, data=Water_Set2) #not normal 
+fit<-lm(Ca_sqrt2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+#similar to original variable 
+
+# Cube Omega Ca
+leveneTest(Ca_cube2~Treatment, data=Water_Set2) #not normal 
+bartlett.test(Ca_cube2~Treatment, data=Water_Set2) #not normal 
+fit<-lm(Ca_cube2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+#similar to original variable 
+
+# Recp
+leveneTest(Ca_recp2~Treatment, data=Water_Set2) #not normal 
+bartlett.test(Ca_recp2~Treatment, data=Water_Set2) #normal 
+fit<-lm(Ca_recp2~Treatment, data=Water_Set2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+#not as bad ! 
+```
+
+
+# Run one-way ANOVAs to identify differences by site 
+```{r}
+Water_Set1$Treatment <- as.factor(Water_Set1$Treatment)
+Water_Set2$Treatment <- as.factor(Water_Set2$Treatment)
+```
+
+## Compare experimental water quality by treatment - set 1
+```{r}
+## Temperature 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Temp~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(Temp~Treatment, data=Water_Set1) #significant 
+dunnTest(Temp ~ Treatment, data=Water_Set1) # no signifance among trts
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(t_log1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") # significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(t_log1~Treatment, data=Water_Set1) #significant 
+dunnTest(t_log1 ~ Treatment, data=Water_Set1) # no signifance among trts
+
+# Sqrt 
+fit2 <-lm(t_sqrt1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") # significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(t_sqrt1~Treatment, data=Water_Set1) #significant 
+dunnTest(t_sqrt1 ~ Treatment, data=Water_Set1) # no signifance among trts
+
+# Cube 
+fit2 <-lm(t_cube1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") # significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(t_cube1~Treatment, data=Water_Set1) #significant 
+dunnTest(t_cube1 ~ Treatment, data=Water_Set1) # no signifance among trts
+```
+
+```{r}
+## Salinity  
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Sal~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(Sal~Treatment, data=Water_Set1) #significant 
+dunnTest(Sal ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(Slog1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") # significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(Slog1~Treatment, data=Water_Set1) #significant 
+dunnTest(Slog1 ~ Treatment, data=Water_Set1) # no signifance among trts
+
+# Recp
+fit2 <-lm(Srecp1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") # significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(Srecp1~Treatment, data=Water_Set1) #significant 
+dunnTest(Srecp1 ~ Treatment, data=Water_Set1) # no signifance among trts
+```
+
+```{r}
+## DO mg  
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(DO_mg~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(DO_mg~Treatment, data=Water_Set1) #significant 
+dunnTest(DO_mg ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(DOlog1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(DOlog1~Treatment, data=Water_Set1) #significant 
+dunnTest(DOlog1 ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Sqrt
+fit2 <-lm(DOsqrt1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(DOsqrt1~Treatment, data=Water_Set1) #significant 
+dunnTest(DOsqrt1 ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Cube
+fit2 <-lm(DOcube1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(DOcube1~Treatment, data=Water_Set1) #significant 
+dunnTest(DOcube1 ~ Treatment, data=Water_Set1) # signifance among trts
+```
+
+```{r}
+## spec pH  
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(spec_pH~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(spec_pH~Treatment, data=Water_Set1) #significant 
+dunnTest(spec_pH ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(pHlog1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(pHlog1~Treatment, data=Water_Set1) #significant 
+dunnTest(pHlog1 ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Sqrt
+fit2 <-lm(pHsqrt1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(pHsqrt1~Treatment, data=Water_Set1) #significant 
+dunnTest(pHsqrt1 ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Cube
+fit2 <-lm(pHcube1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(pHcube1~Treatment, data=Water_Set1) #significant 
+dunnTest(pHcube1 ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Recp
+fit2 <-lm(pHrecp1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(pHrecp1~Treatment, data=Water_Set1) #significant 
+dunnTest(pHrecp1 ~ Treatment, data=Water_Set1) # signifance among trts
+```
+
+```{r}
+## TA  
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(TA~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(TA~Treatment, data=Water_Set1) #significant 
+dunnTest(TA ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(TAlog1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(TAlog1~Treatment, data=Water_Set1) #significant 
+dunnTest(TAlog1 ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Sqrt
+fit2 <-lm(TAsqrt1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(TAsqrt1~Treatment, data=Water_Set1) #significant 
+dunnTest(TAsqrt1 ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Cube
+fit2 <-lm(TAcube1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(TAcube1~Treatment, data=Water_Set1) #significant 
+dunnTest(TAcube1 ~ Treatment, data=Water_Set1) # signifance among trts
+```
+
+```{r}
+## pCO2  
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(pCO2~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(pCO2~Treatment, data=Water_Set1) #significant 
+dunnTest(pCO2 ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(pCO2log1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(pCO2log1~Treatment, data=Water_Set1) #significant 
+dunnTest(pCO2log1 ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Sqrt
+fit2 <-lm(pCO2sqrt1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(pCO2sqrt1~Treatment, data=Water_Set1) #significant 
+dunnTest(pCO2sqrt1 ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Cube
+fit2 <-lm(pCO2cube1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(pCO2cube1~Treatment, data=Water_Set1) #significant 
+dunnTest(pCO2cube1 ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Recp
+fit2 <-lm(pCO2recp1~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(pCO2recp1~Treatment, data=Water_Set1) #significant 
+dunnTest(pCO2recp1 ~ Treatment, data=Water_Set1) # signifance among trts
+```
+
+```{r}
+## pCO2  
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(OmegaCa~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(OmegaCa~Treatment, data=Water_Set1) #significant 
+dunnTest(OmegaCa ~ Treatment, data=Water_Set1) # signifance among trts
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(OmegaCa~Treatment, na.action = na.exclude, data=Water_Set1)
+summary(fit2)
+Anova(fit2, type="III") #significant
+test <- glht(fit2, linfct = mcp(Treatment = "Tukey"))
+summary(test) # significance among trts
+kruskal.test(OmegaCa~Treatment, data=Water_Set1) #significant 
+dunnTest(OmegaCa ~ Treatment, data=Water_Set1) # signifance among trts
+```
+
+
+
+
+## Compare experimental water quality by treatment - set 2
+```{r}
+## Temperature 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Temp~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") #significant
+kruskal.test(Temp~Treatment, data=Water_Set2) #significant 
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(t_log2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(t_log2~Treatment, data=Water_Set2) #significant 
+
+# Sqrt 
+fit2 <-lm(t_sqrt2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(t_sqrt2~Treatment, data=Water_Set2) #significant 
+
+# Cube 
+fit2 <-lm(t_cube2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(t_cube2~Treatment, data=Water_Set2) #significant 
+
+# Recp 
+fit2 <-lm(t_recp2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(t_recp2~Treatment, data=Water_Set2) #significant 
+```
+
+```{r}
+## Salinity  
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Sal~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") #significant
+kruskal.test(Sal~Treatment, data=Water_Set2) #significant 
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(s_log2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(s_log2~Treatment, data=Water_Set2) #significant 
+
+# Sqrt
+fit2 <-lm(s_sqrt2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(s_sqrt2~Treatment, data=Water_Set2) #significant 
+
+# Recp
+fit2 <-lm(s_recp2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(s_recp2~Treatment, data=Water_Set2) #significant 
+```
+
+```{r}
+## DO mg 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(DO_mg~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") #significant
+kruskal.test(DO_mg~Treatment, data=Water_Set2) #significant 
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(do_log2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(do_log2~Treatment, data=Water_Set2) #significant 
+
+# Sqrt 
+fit2 <-lm(do_sqrt2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(do_sqrt2~Treatment, data=Water_Set2) #significant 
+
+# Cube 
+fit2 <-lm(do_cube2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(do_cube2~Treatment, data=Water_Set2) #significant 
+
+# Recp 
+fit2 <-lm(do_recp2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(do_recp2~Treatment, data=Water_Set2) #significant 
+```
+
+```{r}
+## DO mg 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(spec_pH~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") #significant
+kruskal.test(spec_pH~Treatment, data=Water_Set2) #significant 
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(pH_log2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(pH_log2~Treatment, data=Water_Set2) #significant 
+
+# Sqrt 
+fit2 <-lm(pH_sqrt2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(pH_sqrt2~Treatment, data=Water_Set2) #significant 
+
+# Recp 
+fit2 <-lm(pH_recp2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(pH_recp2~Treatment, data=Water_Set2) #significant 
+```
+
+```{r}
+## TA 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(TA~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") #significant
+kruskal.test(TA~Treatment, data=Water_Set2) #significant 
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(TA_log2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(TA_log2~Treatment, data=Water_Set2) #significant 
+
+# Sqrt 
+fit2 <-lm(TA_sqrt2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(TA_sqrt2~Treatment, data=Water_Set2) #significant 
+
+# Cube 
+fit2 <-lm(TA_cube2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(TA_cube2~Treatment, data=Water_Set2) #significant 
+
+# Recp 
+fit2 <-lm(TA_recp2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(TA_recp2~Treatment, data=Water_Set2) #significant 
+```
+
+```{r}
+## pCO2 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(pCO2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") #significant
+kruskal.test(TA~Treatment, data=Water_Set2) #significant 
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(CO_log2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(CO_log2~Treatment, data=Water_Set2) #significant 
+
+# Sqrt 
+fit2 <-lm(CO_sqrt2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(CO_sqrt2~Treatment, data=Water_Set2) #significant 
+
+# Cube 
+fit2 <-lm(CO_cube2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(CO_sqrt2~Treatment, data=Water_Set2) #significant 
+
+# Recp 
+fit2 <-lm(CO_recp2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(CO_recp2~Treatment, data=Water_Set2) #significant 
+```
+
+```{r}
+## Omega Ca 
+
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(OmegaCa~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") #significant
+kruskal.test(OmegaCa~Treatment, data=Water_Set2) #significant 
+
+# Second, I will do the ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed (sqrt and cube)
+# Log
+fit2 <-lm(Ca_log2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(Ca_log2~Treatment, data=Water_Set2) #significant 
+
+# Sqrt 
+fit2 <-lm(Ca_sqrt2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(Ca_sqrt2~Treatment, data=Water_Set2) #significant 
+
+# Cube 
+fit2 <-lm(Ca_cube2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(Ca_sqrt2~Treatment, data=Water_Set2) #significant 
+
+# Recp 
+fit2 <-lm(Ca_recp2~Treatment, na.action = na.exclude, data=Water_Set2)
+summary(fit2)
+Anova(fit2, type="III") # significant
+kruskal.test(Ca_recp2~Treatment, data=Water_Set2) #significant 
+```
+
+
+
+
+
+
+
+
+

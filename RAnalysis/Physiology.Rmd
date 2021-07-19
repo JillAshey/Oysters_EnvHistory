@@ -21,6 +21,8 @@ library(tidyverse)
 library(devtools)
 library(gridExtra)
 library(plotrix)
+library(ggpubr)
+
 ```
 
 # Read in data 
@@ -915,8 +917,6 @@ Gly_Set1 = ggplot(set1Gly, aes(x=name, y=value)) + #establishing what's going on
   theme(axis.line = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
 Gly_Set1
 # no significance 
-ggsave("output/SuppFigures/FigureS10.pdf", plot = Gly_Set1, width = 8, height = 4)
-ggsave("output/SuppFigures/FigureS10.png", plot = Gly_Set1, width = 8, height = 4)
 ```
 
 ```{r}
@@ -952,8 +952,6 @@ CI_Set1 = ggplot(set1CI, aes(x=name, y=value)) + #establishing what's going on t
   theme(axis.line = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
 CI_Set1
 # significance labels: A, A, A, B
-ggsave("output/SuppFigures/FigureS9.pdf", plot = CI_Set1, width = 8, height = 4)
-ggsave("output/SuppFigures/FigureS9.png", plot = CI_Set1, width = 8, height = 4)
 ```
 
 ```{r}
@@ -992,6 +990,8 @@ p_GlySet2 <- ggplot(set2Gly, aes(x=name, y=value)) + # establishes whats going o
   theme(axis.line = element_line(), axis.text.x = element_text(size = 12, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, color = "black"), axis.title.y = element_text(size = 15)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
 p_GlySet2
 # no significance 
+ggsave("output/SuppFigures/FigureS10.pdf", plot = p_GlySet2, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS10.png", plot = p_GlySet2, width = 8, height = 4)
 ```
 
 ```{r}
@@ -1016,7 +1016,7 @@ set2DeltaGly = data.frame(name=c("Merroir", "Piankatank", "Urbanna Creek", "VIMS
                      se = c(MR2_delta_gly_se, PR2_delta_gly_se, UC2_delta_gly_se, VP2_delta_gly_se))
 
 # Bar plot of delta glycogen
-p3 = ggplot(set2DeltaGly, aes(x=name, y=value)) + # establishes whats going on in plot 
+delta_Gly = ggplot(set2DeltaGly, aes(x=name, y=value)) + # establishes whats going on in plot 
   geom_bar(stat = "identity", fill="gray", color = "black", size = 0.3, width = 0.75) + # bar plot in these sizes, shapes, colors, etc
   geom_errorbar(aes(x=name, ymin = value - se, ymax = value + se), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bar in specific size, shape, color, etc
   #geom_text(label = c("A", "A", "A", "A"), aes(y = c(1.5, 7.3, 4.0, 11.0), x = name), size = 6) +
@@ -1025,7 +1025,7 @@ p3 = ggplot(set2DeltaGly, aes(x=name, y=value)) + # establishes whats going on i
   geom_hline(aes(yintercept = 0)) + # making the bars sit flush with the x axis
   theme_minimal() + # setting background theme
   theme(axis.line.y = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
-p3
+delta_Gly
 # no significance 
 ```
 
@@ -1064,6 +1064,9 @@ p_CISet2 <- ggplot(set2CI, aes(x=name, y=value)) + # establishing whats going on
   theme(axis.line = element_line(), axis.text.x = element_text(size = 12, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, color = "black"), axis.title.y = element_text(size = 15)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
 p_CISet2
 # significance labels: AB, AB, A, B
+ggsave("output/SuppFigures/FigureS9.png", plot = p_CISet2, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS9.png", plot = p_CISet2, width = 8, height = 4)
+
 ```
 
 ```{r}
@@ -1088,7 +1091,7 @@ set2DeltaCI = data.frame(name=c("Merroir", "Piankatank", "Urbanna Creek", "VIMS 
                          se = c(MR2_delta_CI_se, PR2_delta_CI_se, UC2_delta_CI_se, VP2_delta_CI_se))
                             
 # Bar plot of delta CI
-p4 = ggplot(set2DeltaCI, aes(x=name, y=value)) + # establishing whats going on in plot
+delta_CI = ggplot(set2DeltaCI, aes(x=name, y=value)) + # establishing whats going on in plot
   geom_bar(stat = "identity", fill="gray", color = "black", size = 0.3, width = 0.5) + # bar plot in these sizes, shapes, colors, etc
   geom_errorbar(aes(x=name, ymin = value - se, ymax = value + se), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bar in specific size, shape, color, etc
   geom_text(label = c("A", "B", "AB", "C"), aes(y = c(0.15, 0.15, 0.15, 0.86), x = name), size = 4) + # adding letters to indicate significance 
@@ -1097,10 +1100,22 @@ p4 = ggplot(set2DeltaCI, aes(x=name, y=value)) + # establishing whats going on i
   geom_hline(aes(yintercept = 0)) + # making the bars sit flush with the x axis
   theme_minimal() + # setting background theme
   theme(axis.line.y = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
-p4
+delta_CI
 #significance labels: A, B, AB, C
 ```
 
+```{r}
+# Putting graphs into grid format by physiological variable
+# Glycogen - gly set1 and delta gly
+gly_Plots <- ggarrange(Gly_Set1, delta_Gly, labels = c("A", "B"))
+ggsave("output/FinalFigs/Figure4.png", plot = gly_Plots, width = 8, height = 4)
+ggsave("output/FinalFigs/Figure4.pdf", plot = gly_Plots, width = 8, height = 4)
+
+# CI - CI set1 and delta CI
+CI_Plots <- ggarrange(p_CISet2, delta_CI, labels = c("A", "B"))
+ggsave("output/FinalFigs/Figure3.png", plot = CI_Plots, width = 8, height = 4)
+ggsave("output/FinalFigs/Figure3.pdf", plot = CI_Plots, width = 8, height = 4)
+```
 
 
 
