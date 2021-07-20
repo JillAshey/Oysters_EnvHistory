@@ -879,7 +879,6 @@ Anova(fit2, type="III") # not significant
 kruskal.test(CI_recp_delta~Site, data=set2) # not significant
 ```
 
-
 # Plot physiology variables variables 
 ```{r}
 ## Set 1 - Glycogen

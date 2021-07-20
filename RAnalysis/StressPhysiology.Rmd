@@ -1,0 +1,472 @@
+---
+title: "Stress Physiology"
+author: "jillashey"
+date: "7/18/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load libraries
+library(car)
+library(rcompanion)
+library(gdata)
+library(multcomp)
+library(nlme)
+library(MASS)
+library(lme4)
+library(FSA)
+library(tidyverse)
+library(devtools)
+library(gridExtra)
+library(plotrix)
+library(ggpubr)
+```
+
+```{r}
+phys <- read.csv("data/FRAP/HT_FRAP_bothSets_042320.csv", header = T)
+head(phys)
+phys$Site <- as.factor(phys$Site)
+phys$Treatment <- as.factor(phys$Treatment)
+frap1 <- filter(phys, Set  == "Set1")
+frap2 <- filter(phys, Set  == "Set2")
+```
+
+We will be using the test_FRAP variable (FRAP/g tissue sample) for analysis
+# Set1
+# Evaluate normality for all variables 
+
+Evaluate normality using histograms, Levene's test, Bartlett test, and QQplots.
+- Levene's test: more robust to departures from normality than Bartlett's test; p>0.05 means the variances are equal
+- Bartlett test: If the data is normally distributed, this is the best test to use. It is more likely to return a "false positive" when the data is non-normal; p>0.05 means the variances are equal
+- Q-Q plot: tests the hypothesis that the data is normally distributed.  If the points on the plot are reasonably well approximated by a straight line, the popular Gaussian data hypothesis is plausible, while marked deviations from linearity provide evidence against this hypothesis and these data points should be removed. 
+
+```{r}
+## FRAP
+# Evaluate normality 
+hist(frap1$test_FRAP)
+plotNormalHistogram(frap1$test_FRAP)
+leveneTest(test_FRAP ~interaction(Treatment, Site), data=frap1) #normal
+bartlett.test(test_FRAP ~interaction(Treatment, Site), data=frap1) # normal
+fit<-lm(test_FRAP ~interaction(Treatment, Site), data=frap1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+# FRAP log and sqrt were previously calculated in df
+plotNormalHistogram(frap1$Log_test_FRAP)
+plotNormalHistogram(frap1$Sqrt_test_FRAP)
+frap_cube1 = sign(frap1$test_FRAP) * abs(frap1$test_FRAP)^(1/3)
+plotNormalHistogram(frap_cube1) 
+frap_recp1 = 1/(frap1$test_FRAP)
+plotNormalHistogram(frap_recp1)
+# Based on initial histograms, recp looks sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+frap1 = cbind(frap1, frap_cube1)
+
+# Log
+leveneTest(Log_test_FRAP ~interaction(Treatment, Site), data=frap1) #normal
+bartlett.test(Log_test_FRAP ~interaction(Treatment, Site), data=frap1) # not normal
+fit<-lm(Log_test_FRAP ~interaction(Treatment, Site), data=frap1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Sqrt
+leveneTest(Sqrt_test_FRAP ~interaction(Treatment, Site), data=frap1) #normal
+bartlett.test(Sqrt_test_FRAP ~interaction(Treatment, Site), data=frap1) # not normal
+fit<-lm(Sqrt_test_FRAP ~interaction(Treatment, Site), data=frap1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Cube
+leveneTest(frap_cube1 ~interaction(Treatment, Site), data=frap1) #normal
+bartlett.test(frap_cube1 ~interaction(Treatment, Site), data=frap1) # not normal
+fit<-lm(frap_cube1 ~interaction(Treatment, Site), data=frap1) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+```
+
+# Set 2
+```{r}
+## FRAP
+# Evaluate normality 
+hist(frap2$test_FRAP)
+plotNormalHistogram(frap2$test_FRAP)
+leveneTest(test_FRAP ~interaction(Treatment, Site), data=frap2) #normal
+bartlett.test(test_FRAP ~interaction(Treatment, Site), data=frap2) # normal
+fit<-lm(test_FRAP ~interaction(Treatment, Site), data=frap2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+# FRAP log and sqrt were previously calculated in df
+plotNormalHistogram(frap2$Log_test_FRAP)
+plotNormalHistogram(frap2$Sqrt_test_FRAP)
+frap_cube2 = sign(frap2$test_FRAP) * abs(frap2$test_FRAP)^(1/3)
+plotNormalHistogram(frap_cube2) 
+frap_recp2 = 1/(frap2$test_FRAP)
+plotNormalHistogram(frap_recp2)
+# Based on initial histograms, sqrt and cube looks sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+frap2 = cbind(frap2, frap_cube2)
+
+# Sqrt
+leveneTest(Sqrt_test_FRAP ~interaction(Treatment, Site), data=frap2) #normal
+bartlett.test(Sqrt_test_FRAP ~interaction(Treatment, Site), data=frap2) # not normal
+fit<-lm(Sqrt_test_FRAP ~interaction(Treatment, Site), data=frap2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Cube
+leveneTest(frap_cube2 ~interaction(Treatment, Site), data=frap2) #normal
+bartlett.test(frap_cube2 ~interaction(Treatment, Site), data=frap2) # not normal
+fit<-lm(frap_cube2 ~interaction(Treatment, Site), data=frap2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+```
+
+```{r}
+## Delta FRAP
+# Evaluate normality 
+hist(frap2$test_FRAP_Delta)
+plotNormalHistogram(frap2$test_FRAP_Delta)
+leveneTest(test_FRAP_Delta ~interaction(Treatment, Site), data=frap2) #normal
+bartlett.test(test_FRAP_Delta ~interaction(Treatment, Site), data=frap2) # normal
+fit<-lm(test_FRAP_Delta ~interaction(Treatment, Site), data=frap2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+# FRAP log and sqrt were previously calculated in df
+plotNormalHistogram(frap2$Log_test_FRAP_Delta)
+plotNormalHistogram(frap2$Sqrt_test_FRAP_Delta)
+d_frap_cube2 = sign(frap2$test_FRAP_Delta) * abs(frap2$test_FRAP_Delta)^(1/3)
+plotNormalHistogram(d_frap_cube2) 
+d_frap_recp2 = 1/(frap2$test_FRAP_Delta)
+plotNormalHistogram(d_frap_recp2)
+# Based on initial histograms, log and sqrt looks sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+# none to bind 
+
+# Log
+leveneTest(Log_test_FRAP_Delta ~interaction(Treatment, Site), data=frap2) # not normal
+bartlett.test(Log_test_FRAP_Delta ~interaction(Treatment, Site), data=frap2) # not normal
+fit<-lm(Log_test_FRAP_Delta ~interaction(Treatment, Site), data=frap2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Sqrt
+leveneTest(Sqrt_test_FRAP_Delta ~interaction(Treatment, Site), data=frap2) #normal
+bartlett.test(Sqrt_test_FRAP_Delta ~interaction(Treatment, Site), data=frap2) # not normal
+fit<-lm(Sqrt_test_FRAP_Delta ~interaction(Treatment, Site), data=frap2) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+```
+
+# Run two-way ANOVAs to identify differences by site 
+#### Comparing sites (MR, PR, UC, VP) and Treatments (MR-A, PR-UC-A, VP-A, Low) for Set1 
+
+```{r}
+## FRAP - set 1
+
+# First, I will do two-way ANOVA test ( using the untransformed variable)
+# Make full model with treatment and site 
+LME_FRAP <-lme(test_FRAP~Treatment+Site,random = ~1|Replicate, data=frap1)
+Anova(LME_FRAP, type="III") ##site significant
+# Because only site was significant, make a reduced model with only site in it 
+reduced_FRAP = lme(test_FRAP~Site,random = ~1|Replicate, data=frap1)
+Anova(reduced_FRAP, type = "III") #site significant 
+# Compare full and reduced model 
+anova(LME_FRAP, reduced_FRAP)
+##pvalue > 0.05, AIC differs by 4 = move forward with more parsimonious model aka reduced model 
+summary(reduced_FRAP)
+# Only site is significant so run Tukey post-hoc test on site only with reduced model
+test <- glht(reduced_FRAP, linfct = mcp(Site = "Tukey"))
+summary(test)
+
+# Second, I will do two-way ANOVA test using the transformed (log, sqrt and cube) variables to compare/check them to the untransformed
+# Log 
+# Make full model with treatment and site 
+LME_FRAP <-lme(Log_test_FRAP~Treatment+Site,random = ~1|Replicate, data=frap1)
+Anova(LME_FRAP, type="III") ##site significant
+# Because only site was significant, make a reduced model with only site in it 
+reduced_FRAP = lme(Log_test_FRAP~Site,random = ~1|Replicate, data=frap1)
+Anova(reduced_FRAP, type = "III") #site significant 
+# Compare full and reduced model 
+anova(LME_FRAP, reduced_FRAP)
+##pvalue > 0.05, AIC differs by 4 = move forward with more parsimonious model aka reduced model 
+summary(reduced_FRAP)
+# Only site is significant so run Tukey post-hoc test on site only with reduced model
+test <- glht(reduced_FRAP, linfct = mcp(Site = "Tukey"))
+summary(test)
+
+# Sqrt 
+# Make full model with treatment and site 
+LME_FRAP <-lme(Sqrt_test_FRAP~Treatment+Site,random = ~1|Replicate, data=frap1)
+Anova(LME_FRAP, type="III") ##site significant
+# Because only site was significant, make a reduced model with only site in it 
+reduced_FRAP = lme(Sqrt_test_FRAP~Site,random = ~1|Replicate, data=frap1)
+Anova(reduced_FRAP, type = "III") #site significant 
+# Compare full and reduced model 
+anova(LME_FRAP, reduced_FRAP)
+##pvalue > 0.05, AIC differs by 4 = move forward with more parsimonious model aka reduced model 
+summary(reduced_FRAP)
+# Only site is significant so run Tukey post-hoc test on site only with reduced model
+test <- glht(reduced_FRAP, linfct = mcp(Site = "Tukey"))
+summary(test)
+
+# Cube 
+# Make full model with treatment and site 
+LME_FRAP <-lme(frap_cube1~Treatment+Site,random = ~1|Replicate, data=frap1)
+Anova(LME_FRAP, type="III") ##site significant
+# Because only site was significant, make a reduced model with only site in it 
+reduced_FRAP = lme(frap_cube1~Site,random = ~1|Replicate, data=frap1)
+Anova(reduced_FRAP, type = "III") #site significant 
+# Compare full and reduced model 
+anova(LME_FRAP, reduced_FRAP)
+##pvalue > 0.05, AIC differs by 4 = move forward with more parsimonious model aka reduced model 
+summary(reduced_FRAP)
+# Only site is significant so run Tukey post-hoc test on site only with reduced model
+test <- glht(reduced_FRAP, linfct = mcp(Site = "Tukey"))
+summary(test)
+```
+
+# Run two-way ANOVAs to identify differences by site 
+#### Comparing sites (MR, PR, UC, VP) and Treatments (MR-A, PR-UC-A, VP-A, Low) for Set2
+
+```{r}
+## FRAP - set 2
+
+# First, I will do two-way ANOVA test ( using the untransformed variable)
+# Make full model with treatment and site 
+LME_FRAP <-lme(test_FRAP~Treatment+Site,random = ~1|Replicate, data=frap2)
+Anova(LME_FRAP, type="III") 
+#no significance for treatment or site, so do not move forward with any models 
+
+# Second, I will do two-way ANOVA test using the transformed (sqrt and cube) variables to compare/check them to the untransformed
+# Sqrt 
+# Make full model with treatment and site 
+LME_FRAP <-lme(Sqrt_test_FRAP~Treatment+Site,random = ~1|Replicate, data=frap2)
+Anova(LME_FRAP, type="III") 
+#no significance for treatment or site, so do not move forward with any models 
+
+# Cube 
+# Make full model with treatment and site 
+LME_FRAP <-lme(frap_cube2~Treatment+Site,random = ~1|Replicate, data=frap2)
+Anova(LME_FRAP, type="III") 
+#no significance for treatment or site, so do not move forward with any models 
+```
+
+```{r}
+## Delta FRAP - set 2
+
+# First, I will do two-way ANOVA test ( using the untransformed variable)
+# Make full model with treatment and site 
+LME_FRAP <-lme(test_FRAP_Delta~Treatment+Site,random = ~1|Replicate, data=frap2)
+Anova(LME_FRAP, type="III") # site significant 
+# Because only site was significant, make a reduced model with only site in it 
+reduced_FRAP = lme(test_FRAP_Delta~Site,random = ~1|Replicate, data=frap1)
+Anova(reduced_FRAP, type = "III") #site significant 
+# Compare full and reduced model 
+anova(LME_FRAP, reduced_FRAP)
+##pvalue > 0.05, AIC differs by 4 = move forward with more parsimonious model aka reduced model 
+summary(reduced_FRAP)
+# Only site is significant so run Tukey post-hoc test on site only with reduced model
+test <- glht(reduced_FRAP, linfct = mcp(Site = "Tukey"))
+summary(test)
+
+# Second, I will do two-way ANOVA test using the transformed (log and sqrt) variables to compare/check them to the untransformed
+# Log 
+# Make full model with treatment and site 
+LME_FRAP <-lme(Log_test_FRAP_Delta~Treatment+Site,random = ~1|Replicate, data=frap2)
+Anova(LME_FRAP, type="III") # site significant 
+# Because only site was significant, make a reduced model with only site in it 
+reduced_FRAP = lme(Log_test_FRAP_Delta~Site,random = ~1|Replicate, data=frap1)
+Anova(reduced_FRAP, type = "III") #site significant 
+# Compare full and reduced model 
+anova(LME_FRAP, reduced_FRAP)
+##pvalue > 0.05, AIC differs by 4 = move forward with more parsimonious model aka reduced model 
+summary(reduced_FRAP)
+# Only site is significant so run Tukey post-hoc test on site only with reduced model
+test <- glht(reduced_FRAP, linfct = mcp(Site = "Tukey"))
+summary(test)
+
+# Sqrt 
+# Make full model with treatment and site 
+LME_FRAP <-lme(Sqrt_test_FRAP_Delta~Treatment+Site,random = ~1|Replicate, data=frap2)
+Anova(LME_FRAP, type="III") # site significant 
+# Because only site was significant, make a reduced model with only site in it 
+reduced_FRAP = lme(Sqrt_test_FRAP_Delta~Site,random = ~1|Replicate, data=frap1)
+Anova(reduced_FRAP, type = "III") #site significant 
+# Compare full and reduced model 
+anova(LME_FRAP, reduced_FRAP)
+##pvalue > 0.05, AIC differs by 4 = move forward with more parsimonious model aka reduced model 
+summary(reduced_FRAP)
+# Only site is significant so run Tukey post-hoc test on site only with reduced model
+test <- glht(reduced_FRAP, linfct = mcp(Site = "Tukey"))
+summary(test)
+```
+
+# Plot physiology variables variables 
+
+```{r}
+## FRAP - set 1
+#Load data file with only avg and SE for each site. 
+FRAP <- read.csv("data/FRAP/HT_FRAP_Siteavgs_043020.csv", header = T)
+#gives me this warning when I load data file:
+# Warning message:
+#   In read.table(file = file, header = header, sep = sep, quote = quote,  :
+#                   incomplete final line found by readTableHeader on '~/Desktop/Coding/R/HT/csv_files/FRAP/HT_FRAP_Siteavgs_043020.csv'
+#not sure what it means, but did not affect plots
+
+# Bar plot for FRAP set 1
+f_p1 = ggplot(FRAP, aes(x=Site, y=FRAPavg1)) + #establishing what's going on the plot
+  geom_bar(stat = "identity", color = "black", size = 0.3, width = 0.5) + # bar plot in these sizes, shapes, colors, etc
+  geom_errorbar(aes(ymin = FRAPavg1 - FRAPse1, ymax = FRAPavg1 + FRAPse1), width = 0.2, position = position_dodge(0.75), size = 0.5) +
+  ylab("Total antioxidant potential (μmol/g of tissue)") + xlab("") + # titles for x and y axes
+  #ggtitle("FRAP set1" - Set1") + # figure title 
+  scale_y_continuous(expand = c(0,0), limits = c(0, 1.35)) + #making the bars sit right on the x axis-- no white space bt the bars and the actual axis
+  theme_minimal() + #setting the background theme
+  theme(axis.line = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+f_p1
+# no significance
+```
+
+```{r}
+## FRAP - set 2
+f_p2 <- ggplot(data = FRAP, aes(x=Site, y=FRAPavg2)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.75) +
+  geom_errorbar(aes(ymin = FRAPavg2 - FRAPse2, ymax = FRAPavg2 + FRAPse2), width = 0.2, position = position_dodge(0.75), size = 0.5) +
+  ylab("Total antioxidant potential (μmol/g of tissue)") + xlab("") + # titles for x and y axes
+  #ggtitle("Total antioxidant potential (μmol/g of tissue) set2") +
+  scale_y_continuous(expand = c(0,0)) + 
+  theme_minimal() +
+  theme(axis.line = element_line(), axis.text.x = element_text(size = 12, angle = 30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, colour = "black"), axis.title.y = element_text(size = 15))
+f_p2
+# no significance
+```
+
+```{r}
+##delta FRAP
+fDelta_p2 = ggplot(FRAP, aes(x=Site, y=dFRAPavg)) + # establishing whats going on in plot
+  geom_bar(stat = "identity", color = "black", size = 0.3, width = 0.5) + # bar plot in these sizes, shapes, colors, etc
+  geom_errorbar(aes(x=Site, ymin = dFRAPavg - dFRAPse, ymax = dFRAPavg + dFRAPse), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bar in specific size, shape, color, etc
+  geom_text(label = c("A", "B", "AB", "A"), aes(y = c(0.1, 0.05, 0.05, 0.21), x = Site), size = 4) + # adding letters to indicate significance 
+  ylab("Change in total antioxidant potential (μmol/g of tissue)") + xlab("") + # x and y axes titles
+  #ggtitle("Delta Condition Index") + # figure title 
+  geom_hline(aes(yintercept = 0)) + # making the bars sit flush with the x axis
+  scale_y_continuous(expand = c(0,0), limits = c(-0.4, 0.3)) + 
+  theme_minimal() + # setting background theme
+  theme(axis.line.y = element_line(), axis.text.x = element_text(size = 10, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=10, color = "black"), axis.title.y = element_text(size = 12)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+fDelta_p2
+# sig values: A, B, AB, A
+```
+
+```{r}
+# Putting graphs into grid format by physiological variable
+# FRAP - frap set1 and delta frap
+frap_Plots <- ggarrange(f_p1, fDelta_p2, labels = c("A", "B"))
+ggsave("output/FinalFigs/Figure5.png", plot = frap_Plots, width = 8, height = 4)
+ggsave("output/FinalFigs/Figure5.pdf", plot = frap_Plots, width = 8, height = 4)
+```
+
+
+
+
+
+
+

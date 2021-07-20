@@ -1,0 +1,81 @@
+---
+title: "T-test"
+author: "jillashey"
+date: "7/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Read in data 
+```{r}
+phys <- read.csv("data/Glycogen_CI/HT_CIGly.csv", header = T)
+head(phys)
+phys$Site <- as.factor(phys$Site)
+#set1 <- filter(phys, Set  == "Set1")
+set2 <- filter(phys, Set  == "Set2")
+
+stress <- read.csv("data/FRAP/HT_FRAP_bothSets_042320.csv", header = T)
+head(stress)
+stress$Site <- as.factor(stress$Site)
+stress$Treatment <- as.factor(stress$Treatment)
+#frap1 <- filter(stress, Set  == "Set1")
+frap2 <- filter(stress, Set  == "Set2")
+```
+
+# Filter by site 
+```{r}
+# Phys df
+MR <- filter(set2, Site  == "MR")
+PR <- filter(set2, Site  == "PR")
+UC <- filter(set2, Site  == "UC")
+VP <- filter(set2, Site  == "VP")
+
+# Stress phys df
+MR.stress <- filter(frap2, Site  == "Merroir")
+PR.stress <- filter(frap2, Site  == "Piankatank")
+UC.stress <- filter(frap2, Site  == "Urbanna Creek")
+VP.stress <- filter(frap2, Site  == "VIMS Pier")
+```
+
+Student's t-test for samples: use when you have one measurement variable and a theoretical expectation of what the mean should be under null. In this case, I am using t-tests to assess if the changes in phys. variables differed from 0
+- Theoretical mean = 0; observed mean = avg of phys variable by site 
+- Null hypothesis is that the mean change of phys variable is equal to 0
+- If t-test is significant, can reject null--the mean change in phys. variable is significantly different from 0
+
+### Only using t-tests for the change in phys. variables. We are comparing by site.
+
+# T-test for physiology 
+```{r}
+##Set 2 - delta glycogen t-tests
+#Do t-tests by site, as we will compare among sites 
+t.test(MR$P_DeltaGly_DW) # not significant
+t.test(PR$P_DeltaGly_DW) # significant 
+t.test(UC$P_DeltaGly_DW) # not significant 
+t.test(VP$P_DeltaGly_DW) # not significant 
+# PR oysters were the only ones to significantly change from 0 during common garden conditions
+
+##Set 2 - delta condition index t-tests
+t.test(MR$Delta_CI) # significant
+t.test(PR$Delta_CI) # significant
+t.test(UC$Delta_CI) # significant
+t.test(VP$Delta_CI) # not significant
+#MR, PR, UC oysters all significantly changed from 0 during CG conditions 
+```
+
+# T-test for stress physiology 
+```{r}
+##Set 2 - delta FRAP t-tests
+t.test(MR.stress$test_FRAP_Delta) # not significant
+t.test(PR.stress$test_FRAP_Delta) # significant 
+t.test(UC.stress$test_FRAP_Delta) # not significant 
+t.test(VP.stress$test_FRAP_Delta) # not significant 
+# PR oysters were the only ones to significantly change from 0 during common garden conditions
+```
+
+
+
+
+

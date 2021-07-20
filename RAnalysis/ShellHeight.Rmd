@@ -1,0 +1,173 @@
+---
+title: "Shell Height"
+author: "jillashey"
+date: "7/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load packages
+library(devtools)
+library(ggplot2)
+library(ggpubr)
+library(gridExtra)
+library(plotrix)
+```
+
+# Read in data 
+```{r}
+SH <- read.csv("data/Growth/HT_InitialShellHeight_022219.csv", header = T)
+
+# Subset by distal shell heights 
+distal.SH <- subset(SH, EnvHist == "Distal")
+```
+
+# Evaluate normality for initial shell height 
+
+Evaluate normality using histograms, Levene's test, Bartlett test, and QQplots.
+- Levene's test: more robust to departures from normality than Bartlett's test; p>0.05 means the variances are equal
+- Bartlett test: If the data is normally distributed, this is the best test to use. It is more likely to return a "false positive" when the data is non-normal; p>0.05 means the variances are equal
+- Q-Q plot: tests the hypothesis that the data is normally distributed.  If the points on the plot are reasonably well approximated by a straight line, the popular Gaussian data hypothesis is plausible, while marked deviations from linearity provide evidence against this hypothesis and these data points should be removed.  
+
+```{r}
+## Initial Shell Height
+# Evaluate normality
+hist(distal.SH$Initial_Shell)
+plotNormalHistogram(distal.SH$Initial_Shell)
+leveneTest(Initial_Shell~Site, data=distal.SH) # not normal
+bartlett.test(Initial_Shell~Site, data=distal.SH) # not normal 
+fit<-lm(Initial_Shell~Site, data=distal.SH) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Transform the variable using log, sqrt, cube, and reciprocal & look at histograms of transformed values
+SH_log = log(distal.SH$Initial_Shell)
+plotNormalHistogram(SH_log)
+SH_sqrt = sqrt(distal.SH$Initial_Shell)
+plotNormalHistogram(SH_sqrt) 
+SH_cube= sign(distal.SH$Initial_Shell) * abs(distal.SH$Initial_Shell)^(1/3)
+plotNormalHistogram(SH_cube) 
+SH_recp = 1/(distal.SH$Initial_Shell)
+plotNormalHistogram(SH_recp)
+# Based on initial histograms, sqrt and cube look sort of normal. Will evaluate normality in these transformed values 
+
+# Bind the transformed variables into the data set 
+distal.SH = cbind(distal.SH, SH_sqrt, SH_cube)
+
+# Evaluate normality in sqrt transformed temperature 
+leveneTest(SH_sqrt~Site, data=distal.SH) # not normal
+bartlett.test(SH_sqrt~Site, data=distal.SH) # not normal 
+fit<-lm(SH_sqrt~Site, data=distal.SH) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+
+# Evaluate normality in cube transformed temperature 
+leveneTest(SH_cube~Site, data=distal.SH) # not normal
+bartlett.test(SH_cube~Site, data=distal.SH) # not normal 
+fit<-lm(SH_cube~Site, data=distal.SH) # qqplot
+par(mfrow=c(2,2))
+qqnorm(residuals(fit), ylab="Residuals")
+qqline(residuals(fit))
+title("QQ-plot of residuals")
+qqnorm(rstandard(fit), ylab="Residuals")
+qqline(rstandard(fit))
+title("QQ-plot of standardized residuals") 
+plot(fitted(fit), residuals(fit), xlab="Fitted", ylab="Residuals")
+abline(h=0)
+title("Residuals vs fitted")
+plot(fitted(fit), abs(residuals(fit)), xlab="Fitted", ylab="Absolute residuals")
+abline(h=0)
+title("Absolute residuals vs fitted")
+```
+
+# Run one-way ANOVA to identify differences by site 
+#### Comparing distal sites: MR, PR, UC, VP
+```{r}
+## Initial shell height
+# First, I will do the ANOVA test and the Kruskal-Wallis test (both using the not transformed variable) to compare results 
+fit2 <-lm(Initial_Shell~Site, na.action = na.exclude, data=distal.SH)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(Initial_Shell~Site, data=distal.SH) # not significant
+
+##Second, I will do the ANOVA test using the transformed variables to compare them to the untransformed 
+# Sqrt
+fit2 <-lm(SH_sqrt~Site, na.action = na.exclude, data=distal.SH)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(SH_sqrt~Site, data=distal.SH) # not significant
+
+# Cube
+fit2 <-lm(SH_cube~Site, na.action = na.exclude, data=distal.SH)
+summary(fit2)
+Anova(fit2, type="III") # not significant
+kruskal.test(SH_cube~Site, data=distal.SH) # not significant
+```
+
+# Plot initial shell height 
+```{r}
+# Calculate mean and std error 
+MR <- subset(distal.SH, Site=="Merroir")
+MR_SH_mean <- mean(MR$Initial_Shell)
+MR_SH_se <- std.error(MR$Initial_Shell)
+
+PR <- subset(distal.SH, Site=="Piankatank")
+PR_SH_mean = mean(PR$Initial_Shell)
+PR_SH_se = std.error(PR$Initial_Shell)
+
+UC <- subset(distal.SH, Site=="Urbanna Creek")
+UC_SH_mean <- mean(UC$Initial_Shell)
+UC_SH_se <- std.error(UC$Initial_Shell)
+
+VP <- subset(distal.SH, Site=="VIMS Pier")
+VP_SH_mean <- mean(VP$Initial_Shell)
+VP_SH_se <- std.error(VP$Initial_Shell)
+
+#make a data frame with the name (categorical variable - Site), the values (average of physiological measurements from each site),
+#and se (standard error for each site)
+distal.SH_summary = data.frame(name=c("Merroir", "Piankatank", "Urbanna Creek", "VIMS Pier"), 
+                    value = c(MR_SH_mean, PR_SH_mean, UC_SH_mean, VP_SH_mean), # mean
+                    se = c(MR_SH_se, PR_SH_se, UC_SH_se, VP_SH_se)) #std error
+
+# Make bar plot for initial shell height 
+p1 = ggplot(distal.SH_summary, aes(x=name, y=value)) + #establishing what's going on the plot
+  geom_bar(stat = "identity", fill="gray", color = "black", size = 0.3, width = 0.5) + #its going to be a bar plot in these sizes, shapes, colors, etc
+  geom_errorbar(aes(x=name, ymin = value - se, ymax = value + se), colour = "black", width = 0.1, alpha = 0.9, size = 0.5) + #error bars in specific size, shape, color, etc
+  ylab("Initial Shell Height (mm)") + xlab("") + #x and y axes titles 
+  #ggtitle("") + #title 
+  scale_y_continuous(expand = c(0,0)) + #making the bars sit right on the x axis-- no white space bt the bars and the actual axis
+  theme_minimal() + #setting the background theme
+  theme(axis.line = element_line(), axis.text.x = element_text(size = 12, angle=30, hjust = 1, colour = "black"), axis.text.y = element_text(size=12, color = "black"), axis.title.y = element_text(size = 15)) #adding specific lines, sizes, degrees, etc for the axes texts and labels
+p1
+
+# Save plots 
+ggsave("output/SuppFigures/FigureS1.pdf", plot = p1, width = 8, height = 4)
+ggsave("output/SuppFigures/FigureS1.png", plot = p1, width = 8, height = 4)
+```
+
+
+
