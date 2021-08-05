@@ -75,7 +75,7 @@ Because we have immediate access to a spectrophotometer at VIMS, the pH of the w
 - Fill 3 small glass vials with water. Rinse 3x before filling. Fill the vials until they have a positive meniscus and cap them. Make sure there are no air bubbles!!
 - Store bottles at 4C for later pH analysis.
 
-#### Monitoring after initial deployment
+##### 8) Monitoring after initial deployment
 
 During each subsequent visit to a site, do protocol steps 2-3 and 5-7.  
 
