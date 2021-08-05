@@ -47,7 +47,7 @@ For 20 uL sample volume (in 96-well plate):
 6. 75 uM | 50 uL from tube 4 | 50 uL | 100 uL | 
 7. 50 uM	| 70 uL from tube 5| 70 uL | 90 uL | 
 8. 25 uM | 50 uL from tube 7 | 50 uL | 100 uL | 
-9.  0 uM | NA	 | 100 uL | 100 uL
+9.  0 uM | NA	 | 100 uL | 100 uL | 
 
 ##### 8) Prepare working reagent.  
 
