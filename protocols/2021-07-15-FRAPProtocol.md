@@ -39,15 +39,15 @@ For 20 uL sample volume (in 96-well plate):
 
 | Standard conc.  | Volume | Vol. MilliQ | Total vol.
 | ------------- | ------------- | ------------- | ------------- | 
-1. 1000 uM |	27.801 mg FeSO4·7H2O | 100 mL	| 99.89 mL | 
-2. 2500 uM | 50 uL from tube 1 | 50 uL | 100 uL | 
-3. 200 uM | 60 uL from tube 1	| 240 uL | 105 uL | 
-4. 150 uM	 | 105 uL from tube 3 | 35 uL | 90 uL | 
-5. 100 uM	| 90 uL from tube 3 | 90 uL | 110 uL | 
-6. 75 uM | 50 uL from tube 4 | 50 uL | 100 uL | 
-7. 50 uM	| 70 uL from tube 5| 70 uL | 90 uL | 
-8. 25 uM | 50 uL from tube 7 | 50 uL | 100 uL | 
-9.  0 uM | NA	 | 100 uL | 100 uL | 
+| 1. 1000 uM |	27.801 mg FeSO4·7H2O | 100 mL	| 99.89 mL | 
+| 2. 2500 uM | 50 uL from tube 1 | 50 uL | 100 uL | 
+| 3. 200 uM | 60 uL from tube 1	| 240 uL | 105 uL | 
+| 4. 150 uM	 | 105 uL from tube 3 | 35 uL | 90 uL | 
+| 5. 100 uM	| 90 uL from tube 3 | 90 uL | 110 uL | 
+| 6. 75 uM | 50 uL from tube 4 | 50 uL | 100 uL | 
+| 7. 50 uM	| 70 uL from tube 5| 70 uL | 90 uL | 
+| 8. 25 uM | 50 uL from tube 7 | 50 uL | 100 uL | 
+| 9.  0 uM | NA	 | 100 uL | 100 uL | 
 
 ##### 8) Prepare working reagent.  
 
