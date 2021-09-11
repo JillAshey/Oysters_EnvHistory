@@ -49,15 +49,24 @@ coordinates(Sites.grid) <- ~ lon_bound + lat_bound
 ```{r}
 CB <- readOGR(dsn = "data/SiteMap/Full_CBay_Shp",layer = "fullcoast_dd") #my shapefile
 #file.exists("data/Full_CBay_Shp")
+
+test <- readOGR(dsn = "data/SiteMap/States_Shp",layer = "tl_2017_us_state") #my shapefile
+plot(test)
+test_subset = subset(test, xmin = -130, xmax = -50, ymin = 24, ymax = 50)
+plot(test_subset)
+
+ggplot() + geom_polygon(data = test, aes(x=long,y=lat, group=group), fill="gray", colour="black") +theme_classic()
+
 ```
 
 # Plot shapefiles 
 ```{r}
 # Plot the shapefile 
 plot(CB)
-ggplot() + geom_polygon(data = CB, aes(x=long,y=lat, group=group), fill="gray", colour="black") +theme_classic()
+CB_plot <- ggplot() + geom_polygon(data = CB, aes(x=long,y=lat, group=group), fill="gray", colour="black") +theme_classic()
+ggsave("output/CB_plot.pdf", plot = CB_plot, width = 10, height = 8)
 
-CB_subset = subset(CB, xmin =)
+#CB_subset = subset(CB, xmin =)
 
 # Subset the data set for just the VA portion of the Bay
 VA_CB <- subset(CB, STATE == "Virginia")
