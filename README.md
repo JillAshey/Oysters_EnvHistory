@@ -1,11 +1,11 @@
 # Effect of environmental history on the physiology and acute stress response of the Eastern oyster (*Crassostrea virginica*)
-##### Authors: Jill Ashey 1,2  and Emily B. Rivest 3
+##### Authors: Jill Ashey<sup>1,2</sup> and Emily B. Rivest<sup>3</sup>
 
-1 Department of Biological Sciences, College of the Environment and Life Sciences, University of Rhode Island, Kingston, RI 02881 USA, ORCID 0000-0001-5499-9786
+<sup>1</sup> Department of Biology, William & Mary, Williamsburg, VA 23185 USA
 
-2 Department of Biology, William & Mary, Williamsburg, VA 23185 USA
+<sup>2</sup> *Present address*: Department of Biological Sciences, College of the Environment and Life Sciences, University of Rhode Island, Kingston, RI 02881 USA, ORCID 0000-0001-5499-9786
 
-3 Department of Biological Sciences, Virginia Institute of Marine Science, William & Mary, Gloucester Point, VA 23062 USA, ORCID 0000-0002-8570-8379
+<sup>3</sup> Department of Biological Sciences, Virginia Institute of Marine Science, William & Mary, Gloucester Point, VA 23062 USA, ORCID 0000-0002-8570-8379
 
 DOI: https://doi.org/10.3354/meps13826. 
 
