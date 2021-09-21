@@ -1,0 +1,100 @@
+---
+title: "CSIO Map"
+author: "jillashey"
+date: "9/21/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load packages 
+library(readxl)
+library(sp)
+library(rgdal)
+library(raster)
+library(raster)
+library(rgeos)
+library(ggplot2)
+library(ggrepel)
+```
+
+Plot project sites on Chesapeake Bay
+
+# Read in data 
+```{r}
+CSIO_loc <- read_excel("data/SiteMap/CSIO_Locations.xlsx")
+
+# Create a buffer in decimal degrees around points to show geography
+buffer <- 0.2
+```
+
+# Set coordinates
+```{r}
+# Read in coordinates by giving the same min and max values for each bound
+geo_bounds <- c(left = min(CSIO_loc$Long)-buffer, 
+                bottom = min(CSIO_loc$Lat)-buffer, 
+                right = max(CSIO_loc$Long)+buffer, 
+                top = max(CSIO_loc$Lat)+buffer)
+
+# Take the four coordinates from the previous step and making a box via a dataframe by indexing into geo_bounds above
+Sites.grid <- expand.grid(lon_bound = c(geo_bounds[1], geo_bounds[3]), 
+                          lat_bound = c(geo_bounds[2], geo_bounds[4]))
+
+# Convert the numbers in our sites.grid df into spatial components
+coordinates(Sites.grid) <- ~ lon_bound + lat_bound
+```
+
+# Load shapefiles 
+```{r}
+CB <- readOGR(dsn = "data/SiteMap/Full_CBay_Shp",layer = "fullcoast_dd") #my shapefile
+#file.exists("data/Full_CBay_Shp")
+
+ggplot() + geom_polygon(data = CB, aes(x=long,y=lat, group=group), fill="gray", colour="black") +theme_classic()
+```
+
+# Plot shapefiles 
+```{r}
+# Plot the shapefile 
+plot(CB)
+CB_plot <- ggplot() + geom_polygon(data = CB, aes(x=long,y=lat, group=group), fill="gray", colour="black") +theme_classic()
+ggsave("output/CSIO_CB_plot.pdf", plot = CB_plot, width = 10, height = 8)
+
+#CB_subset = subset(CB, xmin =)
+
+# Subset the data set for just the VA portion of the Bay
+VA_CB <- subset(CB, STATE == "Virginia" | STATE == "Maryland")
+plot(VA_CB)
+```
+
+# Crop image to spatial extent of sites 
+```{r}
+# Crop image to the spatial extent of project sites. MUST MAKE SURE that the shapefile and your coordinates are the same unit.
+VA_CB_crop <- crop(VA_CB, extent(Sites.grid))
+plot(VA_CB_crop)
+```
+
+# Plot map 
+```{r}
+#plot data points in ggpolt -> geom_label_repel is a way to plot the data point labels in boxes that wont overlap each other. segment.alpha is what gets rid of the lines pointing to each point. 
+quartz()
+ggplot() + geom_polygon(data = VA_CB_crop, aes(x=long,y=lat, group=group), fill="gray", colour="black") +
+  coord_equal() +
+  geom_point(data = CSIO_loc, aes(x=Long, y=Lat, color = Status), size = 3) +
+  scale_color_manual(values = c("green", "black")) +
+  geom_label_repel(data = CSIO_loc, aes(x=Long, y=Lat, label = CSIO_loc$SiteName), size = 4, direction = "both", nudge_y = 0.015, segment.alpha = 0) +
+  labs(x="Longitude", y="Latitude") +
+  theme_classic() +
+  theme (legend.box.background = element_rect(), legend.title.align = 0.5, legend.title = element_text(face = "bold"), legend.text=element_text(size= 12)) 
+
+# Save plot
+ggsave("output/CSIO_Locations.pdf", device = "pdf", width = 12, height = 12, dpi = 600)
+```
+
+
+
+
+
+
+
+
